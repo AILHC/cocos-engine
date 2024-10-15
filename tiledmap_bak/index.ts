@@ -21,21 +21,10 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
-export { RenderDrawInfo, RenderDrawInfoType } from "../2d/renderer/render-draw-info"
-export { RenderEntity, RenderEntityType } from "../2d/renderer/render-entity"
-export { StaticVBAccessor } from "../2d/renderer/static-vb-accessor"
-export { vfmtPosUvColor } from "../2d/renderer/vertex-format"
-export { SAXParser } from "../asset/asset-manager/plist-parser"
-import codec from "../../external/compression/ZipUtils"
-import zlib from "../../external/compression/zlib.min"
-const gexport = {
-    codec,
-    zlib
-}
-export { gexport }
-// export * from './tiled-map';
+
+export * from './tiled-map';
 export * from './tiled-map-asset';
-// export * from './tiled-layer';
-// export * from './tiled-object-group';
-// export * from './tiled-tile';
-// export * from './assembler';
+export * from './tiled-layer';
+export * from './tiled-object-group';
+export * from './tiled-tile';
+export * from './assembler';

@@ -28,3 +28,4 @@ import './splash-screen';
 
 export * from './director';
 export * from './game';
+export * from '../version'
