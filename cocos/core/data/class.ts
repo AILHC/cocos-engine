@@ -65,7 +65,7 @@ function appendProp (cls, name): void {
         //    return;
         // }
         if (name.indexOf('.') !== -1) {
-            errorID(3634);
+            errorID(3634, name);
             return;
         }
     }
@@ -168,7 +168,7 @@ function define (className, baseClass, options): any {
     if (frame && js.isChildClassOf(baseClass, Component)) {
         // project component
         if (js.isChildClassOf(frame.cls, Component)) {
-            errorID(3615);
+            errorID(3615, className);
             return null;
         }
         if (DEV && frame.uuid && className) {
