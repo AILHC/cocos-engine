@@ -1,12 +1,12 @@
 {
     "files.exclude": {
         ".git": true,
-        "node_modules": true,
+        "node_modules": false,
     },
     "search.exclude": {
         ".git": true,
-        "node_modules": true,
         ".github": true,
+        "**/node_modules": false,
         "bin": true
     },
     "typescript.preferences.importModuleSpecifier": "relative",
