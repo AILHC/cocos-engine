@@ -43,6 +43,7 @@ import { bindingMappingInfo } from '../rendering/define';
 import { ICustomJointTextureLayout } from '../3d/skeletal-animation/skeletal-animation-utils';
 import { IPhysicsConfig } from '../physics/framework/physics-config';
 import { effectSettings } from '../core/effect-settings';
+import { customEngineVersion } from '../version';
 /**
  * @zh
  * 游戏配置。
@@ -390,6 +391,10 @@ export class Game extends EventTarget {
      * @method onStart
      */
     public onStart: Game.OnStart | null = null;
+
+    public get customGameEngineVersion (){
+        return customEngineVersion;
+    }
 
     constructor () {
         super();
