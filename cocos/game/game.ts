@@ -41,6 +41,7 @@ import { bindingMappingInfo } from '../rendering/define';
 import { ICustomJointTextureLayout } from '../3d/skeletal-animation/skeletal-animation-utils';
 import { IPhysicsConfig } from '../physics/framework/physics-config';
 import { effectSettings } from '../core/effect-settings';
+import { customEngineVersion } from '../version';
 /**
  * @zh
  * 游戏配置。
@@ -509,7 +510,9 @@ export class Game extends EventTarget {
      * 在这个事件点你可以安全使用访问项目数据的相关接口，例如 [resources.load]/[director.loadScene] 等 API。
      */
     public readonly onPostProjectInitDelegate: AsyncDelegate<() => (Promise<void> | void)> = new AsyncDelegate();
-
+    public get customGameEngineVersion(){
+        return customEngineVersion;
+    }
     // @Methods
 
     //  @Game play control
