@@ -29,7 +29,7 @@ import { PolygonCollider2D } from '../../framework';
 import { PHYSICS_2D_PTM_RATIO } from '../../framework/physics-types';
 import { IPolygonShape } from '../../spec/i-physics-shape';
 import { logID, Vec2 } from '../../../core';
-
+const tempVec2 = new Vec2();
 /** @mangle */
 export class b2PolygonShape extends b2Shape2D implements IPolygonShape {
     _worldPoints: Vec2[] = [];
@@ -38,11 +38,13 @@ export class b2PolygonShape extends b2Shape2D implements IPolygonShape {
         const points = comp.points;
         const worldPoints = this._worldPoints;
         const m = comp.node.worldMatrix;
+        const offset = comp.offset;
         for (let i = 0; i < points.length; i++) {
             if (!worldPoints[i]) {
                 worldPoints[i] = new Vec2();
             }
-            Vec2.transformMat4(worldPoints[i], points[i], m);
+            tempVec2.set(points[i].x + offset.x, points[i].y + offset.y);
+            Vec2.transformMat4(worldPoints[i], tempVec2, m);
         }
         worldPoints.length = points.length;
 
