@@ -756,16 +756,24 @@ export class EditBox extends Component {
         node?.off(SpriteEventType.SPRITE_FRAME_CHANGED, this._onBackgroundSpriteFrameChanged, this);
     }
 
-    protected _updateLabelPosition (size: Size): void {
-        const trans = this.node._getUITransformComp()!;
-        const offX = -trans.anchorX * trans.width;
-        const offY = -trans.anchorY * trans.height;
-
+    protected _updateLabelPosition(size: Size): void {
+        const trans = this.node._uiProps.uiTransformComp!;
+        const labelCenterX = (0.5 - trans.anchorX) * trans.width + LEFT_PADDING;
+        const labelCenterY = (0.5 - trans.anchorY) * trans.height;
+        // 默认两个label的锚点都是居中的
+        const labelContentWidth = size.width - LEFT_PADDING;
+        const labelContentHeight = size.height
         const placeholderLabel = this._placeholderLabel;
         const textLabel = this._textLabel;
         if (textLabel) {
-            textLabel.node._getUITransformComp()!.setContentSize(size.width - LEFT_PADDING, size.height);
-            textLabel.node.setPosition(offX + LEFT_PADDING, offY + size.height, textLabel.node.position.z);
+            const labelTrans = textLabel.node._uiProps.uiTransformComp;
+            labelTrans!.setContentSize(labelContentWidth, labelContentHeight);
+            // 已知锚点，算出中间位置
+            // labelTrans?.setAnchorPoint(0.5, 0.5);
+            // const offX = centerX - (0.5 - textLabelTrans!.anchorX) * textLabelTrans!.width;
+            // const offY = centerY - (0.5 - textLabelTrans!.anchorY) * textLabelTrans!.height;
+
+            textLabel.node.setPosition(labelCenterX, labelCenterY, textLabel.node.position.z);
             if (this._inputMode === InputMode.ANY) {
                 textLabel.verticalAlign = VerticalTextAlignment.TOP;
             }
@@ -773,8 +781,10 @@ export class EditBox extends Component {
         }
 
         if (placeholderLabel) {
-            placeholderLabel.node._getUITransformComp()!.setContentSize(size.width - LEFT_PADDING, size.height);
-            placeholderLabel.node.setPosition(offX + LEFT_PADDING, offY + size.height, placeholderLabel.node.position.z);
+            const labelTrans = placeholderLabel.node._uiProps.uiTransformComp;
+            // labelTrans?.setAnchorPoint(0.5, 0.5);
+            labelTrans!.setContentSize(labelContentWidth, labelContentHeight);
+            placeholderLabel.node.setPosition(labelCenterX, labelCenterY, placeholderLabel.node.position.z);
             placeholderLabel.enableWrapText = this._inputMode === InputMode.ANY;
         }
     }
