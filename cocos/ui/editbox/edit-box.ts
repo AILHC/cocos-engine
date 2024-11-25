@@ -769,7 +769,7 @@ export class EditBox extends Component {
             const labelTrans = textLabel.node._uiProps.uiTransformComp;
             labelTrans!.setContentSize(labelContentWidth, labelContentHeight);
             // 已知锚点，算出中间位置
-            // labelTrans?.setAnchorPoint(0.5, 0.5);
+            labelTrans?.setAnchorPoint(0.5, 0.5);
             // const offX = centerX - (0.5 - textLabelTrans!.anchorX) * textLabelTrans!.width;
             // const offY = centerY - (0.5 - textLabelTrans!.anchorY) * textLabelTrans!.height;
 
@@ -782,7 +782,7 @@ export class EditBox extends Component {
 
         if (placeholderLabel) {
             const labelTrans = placeholderLabel.node._uiProps.uiTransformComp;
-            // labelTrans?.setAnchorPoint(0.5, 0.5);
+            labelTrans?.setAnchorPoint(0.5, 0.5);
             labelTrans!.setContentSize(labelContentWidth, labelContentHeight);
             placeholderLabel.node.setPosition(labelCenterX, labelCenterY, placeholderLabel.node.position.z);
             placeholderLabel.enableWrapText = this._inputMode === InputMode.ANY;
