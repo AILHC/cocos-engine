@@ -82,6 +82,14 @@ export class TextProcessing {
         this._context = this._canvasData.context;
     }
 
+    private _noCharSpace = false;
+    public get noCharSpace() : boolean {
+        return this._noCharSpace;
+    }
+    public set noCharSpace(v : boolean) {
+        this._noCharSpace = v;
+    }
+
     public destroy (): void {
         CanvasPool.getInstance().put(this._canvasData!);
         this._lettersInfo.length = 0;
@@ -836,6 +844,7 @@ export class TextProcessing {
                     } else {
                         logID(16355, style.fontFamily, character);
                     }
+                    this.noCharSpace = true;
                     continue;
                 }
 

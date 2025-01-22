@@ -166,7 +166,9 @@ export const bmfontUtils = {
             this._resetProperties();
         }
 
-        if (comp.spriteFrame) {
+        if (TextProcessing.instance.noCharSpace && comp?.cacheMode == CacheMode.CHAR) {
+            comp.onUpdateRenderFailed()
+        } else if (comp.spriteFrame) {
             const renderData = comp.renderData;
             renderData.updateRenderData(comp, comp.spriteFrame);
         }

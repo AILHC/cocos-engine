@@ -27,8 +27,8 @@ import { Label } from '../../components';
 import { bmfontUtils } from './bmfontUtils';
 import { shareLabelInfo, LetterAtlas, computeHash, LetterRenderTexture } from './font-utils';
 
-const _atlasWidth = 1024;
-const _atlasHeight = 1024;
+const _atlasWidth = 2048;
+const _atlasHeight = 2048;
 const _isBold = false;
 
 let _shareAtlas: LetterAtlas | null  = null;

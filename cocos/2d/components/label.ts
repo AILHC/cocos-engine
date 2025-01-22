@@ -204,6 +204,14 @@ export class Label extends UIRenderer {
      */
     public static _canvasPool = CanvasPool.getInstance();
 
+    public get lastString() {
+        return this._lastString;
+    }
+
+    public set lastString(value) {
+        this._lastString = value;
+    }
+
     /**
      * @en
      * Content string of label.
@@ -785,6 +793,8 @@ export class Label extends UIRenderer {
         return this._textLayoutData!;
     }
 
+    private _lastString = '';
+
     @serializable
     protected _string = 'label';
     @serializable
@@ -938,6 +948,12 @@ export class Label extends UIRenderer {
         super.onDestroy();
     }
 
+    public onUpdateRenderFailed() {
+        if (this.cacheMode != CacheMode.NONE) {
+            this.cacheMode = CacheMode.NONE;
+        }
+    }
+
     /**
      * @en update render data.
      * @zh 更新渲染相关数据。
@@ -962,6 +978,7 @@ export class Label extends UIRenderer {
 
     // Cannot use the base class methods directly because BMFont and CHAR cannot be updated in assambler with just color.
     protected _updateColor (): void {
+        this._lastString = "";
         super._updateColor();
         this.markForUpdateRenderData();
     }
