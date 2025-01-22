@@ -44,6 +44,9 @@ export class FontLetterDefinition {
     public offsetY = 0;
     public valid = false;
     public xAdvance = 0;
+    public rawWidth = 0;
+    public rawHeight = 0;
+    public refCount = 0;
 }
 
 export interface ILetterDefinition {
@@ -97,6 +100,10 @@ export class FontAtlas {
 
     public getLetter (key: string): FontLetterDefinition {
         return this.letterDefinitions[key];
+    }
+
+    public releaseLetter(char: string, labelInfo?: IShareLabelInfo) {
+
     }
 
     public getLetterDefinitionForChar (char: string, labelInfo?: IShareLabelInfo): FontLetterDefinition | null {
