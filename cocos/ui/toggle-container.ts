@@ -148,6 +148,29 @@ export class ToggleContainer extends Component {
         }
     }
 
+    public notifyToggleCheckByIndex(index: number, emitEvent = true) {
+        if (!this.enabledInHierarchy) { return; }
+
+        let toggle: Toggle | null = null;
+
+        for (let i = 0; i < this.toggleItems.length; i++) {
+            const item = this.toggleItems[i]!;
+            if (index === i) {
+                item.set_value_emitEvent(true, false);
+                continue;
+            }
+            if (emitEvent) {
+                item.set_value_emitEvent(false, false);
+            } else {
+                item.setIsCheckedWithoutNotify(false);
+            }
+        }
+
+        if (this.checkEvents && toggle) {
+            legacyCC.Component.EventHandler.emitEvents(this.checkEvents, toggle);
+        }
+    }
+
     /**
      * @en Ensure toggles state valid.
      * @zh 确保 toggles 状态有效。
