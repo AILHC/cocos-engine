@@ -21,8 +21,8 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
-import { EDITOR_NOT_IN_PREVIEW, JSB } from 'internal:constants';
-import { ccclass, executeInEditMode, help, menu, serializable, type, override, displayOrder, editable, visible } from 'cc.decorator';
+import { EDITOR_NOT_IN_PREVIEW, JSB, BUILD } from 'internal:constants';
+import { ccclass, executeInEditMode, help, menu, serializable, type, displayName, override, displayOrder, editable, tooltip } from 'cc.decorator';
 import { Material, Texture2D } from '../asset/assets';
 import { error, errorID, logID, warnID } from '../core/platform/debug';
 import { Enum, EnumType, ccenum } from '../core/value-types/enum';
@@ -298,6 +298,8 @@ export class Skeleton extends UIRenderer {
     protected _needUpdateSkeltonData = true;
     protected _listener: TrackEntryListeners | null = null;
 
+    protected _forcePreviewInEditor: boolean = false;
+
     /**
      * @engineInternal
      * @mangle
@@ -374,6 +376,18 @@ export class Skeleton extends UIRenderer {
         }
     }
 
+    @displayName('CanPreviewInEditor')
+    @type(Boolean)
+    get forcePreview (): boolean {
+        return this._forcePreviewInEditor;
+    }
+
+    @displayName('CanPreviewInEditor')
+    @type(Boolean)
+    set forcePreview (canPreview: boolean): boolean {
+        this._forcePreviewInEditor = canPreview;
+    }
+
     /**
      * @engineInternal
      */
@@ -430,7 +444,7 @@ export class Skeleton extends UIRenderer {
     @visible(true)
     @type(SpineDefaultAnimsEnum)
     get _animationIndex (): number {
-        const animationName = EDITOR_NOT_IN_PREVIEW ? this.defaultAnimation : this.animation;
+        const animationName = this._cannotPreviewInEditor() ? this.defaultAnimation : this.animation;
         if (this.skeletonData) {
             if (animationName) {
                 const animsEnum = this.skeletonData.getAnimsEnum();
@@ -461,7 +475,7 @@ export class Skeleton extends UIRenderer {
         const animName = String(animsEnum[value]);
         if (animName !== undefined) {
             this.animation = animName;
-            if (EDITOR_NOT_IN_PREVIEW) {
+            if (this._cannotPreviewInEditor()) {
                 this.defaultAnimation = animName;
                 this._refreshInspector();
             } else {
@@ -560,7 +574,7 @@ export class Skeleton extends UIRenderer {
         return this._sockets;
     }
     set sockets (val: SpineSocket[]) {
-        if (EDITOR_NOT_IN_PREVIEW) {
+        if (this._cannotPreviewInEditor()) {
             this._verifySockets(val);
         }
         this._sockets = val;
@@ -819,7 +833,7 @@ export class Skeleton extends UIRenderer {
      * 皮肤等)和动画, 但不保存任何状态。
      */
     public setSkeletonData (skeletonData: spine.SkeletonData): void {
-        if (!EDITOR_NOT_IN_PREVIEW) {
+        if (!this._cannotPreviewInEditor()) {
             const preSkeletonCache = this._skeletonCache;
             if (this._cacheMode === SpineAnimationCacheMode.SHARED_CACHE) {
                 this._skeletonCache = SkeletonCache.sharedCache;
@@ -1063,7 +1077,8 @@ export class Skeleton extends UIRenderer {
      * @param dt @en delta time. @zh 时间差。
      */
     public updateAnimation (dt: number): void {
-        this._markForUpdateRenderData();
+        this.markForUpdateRenderData();
+        if (this._cannotPreviewInEditor()) return;
         if (this.paused) return;
         if (this.isAnimationCached()) {
             // On realTime mode, dt is multiplied at native side.
@@ -1316,7 +1331,7 @@ export class Skeleton extends UIRenderer {
     }
 
     protected _refreshInspector (): void {
-        if (EDITOR_NOT_IN_PREVIEW) {
+        if (this._cannotPreviewInEditor()) {
             // update inspector
             this._updateAnimEnum();
             this._updateSkinEnum();
@@ -1363,8 +1378,8 @@ export class Skeleton extends UIRenderer {
      * @zh 当前是否处于缓存模式。
      */
     public isAnimationCached (): boolean {
-        if (EDITOR_NOT_IN_PREVIEW) return false;
-        return this._cacheMode !== SpineAnimationCacheMode.REALTIME;
+        if (this._cannotPreviewInEditor()) return false;
+        return this._cacheMode !== AnimationCacheMode.REALTIME;
     }
     /**
      * @en
@@ -1521,7 +1536,7 @@ export class Skeleton extends UIRenderer {
             warnID(16417);
         } else if (this._state) {
             this._state.clearTrack(trackIndex);
-            if (EDITOR_NOT_IN_PREVIEW) {
+            if (this._cannotPreviewInEditor()) {
                 this._state.update(0);
             }
         }
@@ -1568,6 +1583,20 @@ export class Skeleton extends UIRenderer {
         });
     }
 
+    protected _getNodePath(node: Node) {
+        let ret: string[] = [node.name];
+        let root_node = node?.parent;
+        while (root_node) {
+            if (root_node.parent == null) {
+                break;
+            }
+            ret.push(root_node.name);
+            root_node = root_node.parent;
+        }
+        const str = ret.reverse().join('/');
+        return str;
+    }
+
     protected _updateSocketBindings (): void {
         if (!this._skeleton) return;
         this._socketNodes.clear();
@@ -1576,7 +1605,12 @@ export class Skeleton extends UIRenderer {
             if (socket.path && socket.target) {
                 const boneIdx = this._cachedSockets.get(socket.path);
                 if (!boneIdx) {
-                    error(`Skeleton data does not contain path ${socket.path}`);
+                    if (BUILD) {
+                        error(`Skeleton data does not contain path ${socket.path}`);
+                    } else {
+                        const spineNodePath = this._getNodePath(this.node) || '';
+                        error(`Skeleton data does not contain path ${socket.path}, spine = ${spineNodePath}`);
+                    }
                     continue;
                 }
                 this._socketNodes.set(boneIdx, socket.target);
@@ -1938,6 +1972,10 @@ export class Skeleton extends UIRenderer {
         if (this._debugRenderer) {
             this._debugRenderer.node.layer = this.node.layer;
         }
+    }
+
+    protected _cannotPreviewInEditor (): boolean {
+        return EDITOR_NOT_IN_PREVIEW && !this._forcePreviewInEditor;
     }
 }
 
