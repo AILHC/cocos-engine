@@ -160,6 +160,10 @@ export class Toggle extends Button {
         }
     }
 
+    public set_value_emitEvent(value: boolean, emitEvent = true) {
+        this._set(value, emitEvent);
+    }
+
     /**
      * @deprecated since v3.7.0, this is an engine private interface that will be removed in the future.
      */
