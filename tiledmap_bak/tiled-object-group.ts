@@ -375,7 +375,7 @@ export class TiledObjectGroup extends Component {
 
                 imgTrans.setContentSize(object.width, object.height);
 
-                sprite._markForUpdateRenderData();
+                sprite.markForUpdateRenderData();
             }
         }
         this._objects = objects;
@@ -430,7 +430,7 @@ export class TiledObjectGroup extends Component {
             spf.rect = grid._rect!;
 
             sp.spriteFrame = spf;
-            sp._markForUpdateRenderData();
+            sp.markForUpdateRenderData();
         }
     }
 }
