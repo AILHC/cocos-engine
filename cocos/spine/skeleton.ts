@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 import { EDITOR_NOT_IN_PREVIEW, JSB, BUILD } from 'internal:constants';
-import { ccclass, executeInEditMode, help, menu, serializable, type, displayName, override, displayOrder, editable, tooltip } from 'cc.decorator';
+import { ccclass, executeInEditMode, help, menu, serializable, type, displayName, override, displayOrder, editable, tooltip, visible } from 'cc.decorator';
 import { Material, Texture2D } from '../asset/assets';
 import { error, errorID, logID, warnID } from '../core/platform/debug';
 import { Enum, EnumType, ccenum } from '../core/value-types/enum';
@@ -375,17 +375,14 @@ export class Skeleton extends UIRenderer {
             this._updateUITransform();
         }
     }
-
     @displayName('CanPreviewInEditor')
     @type(Boolean)
     get forcePreview (): boolean {
         return this._forcePreviewInEditor;
     }
-
-    @displayName('CanPreviewInEditor')
-    @type(Boolean)
-    set forcePreview (canPreview: boolean): boolean {
-        this._forcePreviewInEditor = canPreview;
+    set forcePreview (value: boolean) {
+        this._forcePreviewInEditor = value;
+        this.paused = !value;
     }
 
     /**
@@ -934,7 +931,7 @@ export class Skeleton extends UIRenderer {
      * @param regionAttachment @en An attachment type of RegionAttachment or BoundingBoxAttachment. @zh RegionAttachment 或 BoundingBoxAttachment 的附件。
      * @return @en TextureRegion contains texture and atlas text information. @zh TextureRegion包含纹理和图集文本信息。
      */
-    public getTextureAtlas (regionAttachment: spine.RegionAttachment | spine.BoundingBoxAttachment): spine.TextureRegion  {
+    public getTextureAtlas (regionAttachment: spine.RegionAttachment | spine.BoundingBoxAttachment): spine.TextureRegion {
         return (regionAttachment as spine.RegionAttachment).region;
     }
     /**
@@ -1393,7 +1390,7 @@ export class Skeleton extends UIRenderer {
      * skeleton.setAnimationCacheMode(sp.Skeleton.AnimationCacheMode.SHARED_CACHE);
      */
     public setAnimationCacheMode (cacheMode: SpineAnimationCacheMode): void {
-        if (this._preCacheMode  !== cacheMode) {
+        if (this._preCacheMode !== cacheMode) {
             this._cacheMode = cacheMode;
             this._preCacheMode = cacheMode;
             if (this._instance) {
@@ -1583,8 +1580,8 @@ export class Skeleton extends UIRenderer {
         });
     }
 
-    protected _getNodePath(node: Node) {
-        let ret: string[] = [node.name];
+    protected _getNodePath (node: Node) {
+        const ret: string[] = [node.name];
         let root_node = node?.parent;
         while (root_node) {
             if (root_node.parent == null) {
@@ -1917,7 +1914,7 @@ export class Skeleton extends UIRenderer {
      * @param entry
      * @param listener @en Listener for registering callback functions. @zh 监听器对象，可注册回调方法。
      */
-    public setTrackEventListener (entry: spine.TrackEntry, listener: TrackListener|TrackListener2): void {
+    public setTrackEventListener (entry: spine.TrackEntry, listener: TrackListener | TrackListener2): void {
         TrackEntryListeners.getListeners(entry, this._instance!).event = listener;
     }
 
