@@ -178,7 +178,10 @@ export class UIOpacity extends Component {
 
     @serializable
     protected _opacity = 255;
-
+    public static setEntityLocalOpacityDirtyRecursively: (node: Node,
+        dirty: boolean,
+        parentOpacity: number,
+        stopRecursiveIfHasOpacity: boolean) => void = setEntityLocalOpacityDirtyRecursively;
     protected _getParentOpacity (node: Node): number {
         if (node == null || !node.isValid) {
             return 1;
