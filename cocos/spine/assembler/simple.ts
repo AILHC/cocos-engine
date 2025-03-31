@@ -117,7 +117,8 @@ class Simple implements IAssembler {
 
     updateRenderData (comp: Skeleton): void {
         const skeleton = comp._skeleton;
-        if (skeleton && comp.node.active && comp.skeletonData?.isValid) {
+        const cull = !!comp.node.__CULLED__;
+        if (skeleton && comp.node.active && !cull && comp.skeletonData?.isValid) {
             updateComponentRenderData(comp);
         }
     }
