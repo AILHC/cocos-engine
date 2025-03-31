@@ -1060,6 +1060,28 @@ Object.defineProperty(nodeProto, 'activeInHierarchy', {
     },
 });
 
+Object.defineProperty(nodeProto, '__CULLED__', {
+    configurable: true,
+    enumerable: true,
+    get(): Readonly<Boolean> {
+        return this._sharedUint8Arr[4] != 0; // Uint8, 4: __CULLED__
+    },
+    set(v) {
+        this._sharedUint8Arr[4] = (v ? 1 : 0); // Uint8, 4: __CULLED__
+    },
+});
+
+Object.defineProperty(nodeProto, '__CULLED_SCREEN__', {
+    configurable: true,
+    enumerable: true,
+    get(): Readonly<Boolean> {
+        return this._sharedUint8Arr[5] != 0; // Uint8, 5: __CULLED_SCREEN__
+    },
+    set(v) {
+        this._sharedUint8Arr[5] = (v ? 1 : 0); // Uint8, 5: __CULLED_SCREEN__
+    },
+});
+
 Object.defineProperty(nodeProto, '_activeInHierarchy', {
     configurable: true,
     enumerable: true,
@@ -1528,10 +1550,10 @@ nodeProto._ctor = function (name?: string) {
     this._sharedUint32Arr = new Uint32Array(sharedArrayBuffer, 0, 3);
     // Int32Array with 1 element: siblingIndex
     this._sharedInt32Arr = new Int32Array(sharedArrayBuffer, 12, 1);
-    // Uint8Array with 4 elements: activeInHierarchy, active, static, _hasSkewComp
-    this._sharedUint8Arr = new Uint8Array(sharedArrayBuffer, 16, 4);
+    // Uint8Array with 4 elements: activeInHierarchy, active, static, _hasSkewComp, __CULLED__, __CULLED_SCREEN__
+    this._sharedUint8Arr = new Uint8Array(sharedArrayBuffer, 16, 6);
     // Float32Array with 2 elements: skewX, skewY
-    this._sharedFloat32Arr = new Float32Array(sharedArrayBuffer, 20, 2);
+    this._sharedFloat32Arr = new Float32Array(sharedArrayBuffer, 24, 2);
 
     this._sharedUint32Arr[1] = Layers.Enum.DEFAULT; // this._sharedUint32Arr[1] is layer
     this._scene = null;

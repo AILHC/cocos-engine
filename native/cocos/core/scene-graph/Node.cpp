@@ -51,7 +51,7 @@ Node::Node() : Node(EMPTY_NODE_NAME) {
 }
 
 Node::Node(const ccstd::string &name) {
-#define NODE_SHARED_MEMORY_BYTE_LENGTH (28)
+#define NODE_SHARED_MEMORY_BYTE_LENGTH (32)
     static_assert(offsetof(Node, _skewY) + sizeof(_skewY) - offsetof(Node, _eventMask) == NODE_SHARED_MEMORY_BYTE_LENGTH, "Wrong shared memory size");
     _sharedMemoryActor.initialize(&_eventMask, NODE_SHARED_MEMORY_BYTE_LENGTH);
 #undef NODE_SHARED_MEMORY_BYTE_LENGTH

@@ -218,6 +218,12 @@ public:
         _activeInHierarchy = (v ? 1 : 0);
     }
 
+    inline bool isCulled() const { return __CULLED__ != 0; }
+    inline void setIsCulled(bool v) { __CULLED__ = (v ? 1 : 0); }
+
+    inline bool isCulledScreen() const { return __CULLED_SCREEN__ != 0; }
+    inline void setIsCulledScreen(bool v) { __CULLED_SCREEN__ = (v ? 1 : 0); }
+
     inline const ccstd::vector<IntrusivePtr<Node>> &getChildren() const { return _children; }
     inline Node *getParent() const { return _parent; }
     // inline NodeEventProcessor *getEventProcessor() const { return _eventProcessor; }
@@ -689,6 +695,12 @@ private:
     uint8_t _active{1};                                                 // Uint8: 1
     uint8_t _isStatic{0};                                               // Uint8: 2
     uint8_t _skewType{static_cast<uint8_t>(SkewType::NONE)};            // Uint8: 3
+
+    uint8_t __CULLED__{0};                                              // Uint8: 4
+    uint8_t __CULLED_SCREEN__{0};                                       // Uint8: 5
+    uint8_t _padding1{0};                                               // Uint8: 6
+    uint8_t _padding2{0};                                               // Uint8: 7
+
     float _skewX{.0F};                                                  // Float32: 0
     float _skewY{.0F};                                                  // Float32: 1
 

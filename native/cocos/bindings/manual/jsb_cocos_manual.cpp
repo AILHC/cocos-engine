@@ -675,6 +675,52 @@ static bool js_se_setExceptionCallback(se::State &s) { // NOLINT(readability-ide
 }
 SE_BIND_FUNC(js_se_setExceptionCallback) // NOLINT(readability-identifier-naming)
 
+static bool js_se_setErrMesageCallback(se::State &s) { // NOLINT(readability-identifier-naming)
+    const auto &args = s.args();
+    if (args.size() != 1 || !args[0].isObject() || !args[0].toObject()->isFunction()) {
+        SE_REPORT_ERROR("expect 1 arguments of Function type, %d provided", (int)args.size());
+        return false;
+    }
+
+    se::Object *objFunc = args[0].toObject();
+    // se::Value::reset will invoke decRef() while destroying s.args()
+    // increase ref here
+    objFunc->incRef();
+    if (s.thisObject()) {
+        s.thisObject()->attachObject(objFunc); // prevent GC
+    } else {
+        //prevent GC in C++ & JS
+        objFunc->root();
+    }
+
+    se::ScriptEngine::getInstance()->setErrMessageCallback([objFunc](const char *message) {
+        se::AutoHandleScope scope;
+        se::ValueArray jsArgs;
+        jsArgs.resize(1);
+        jsArgs[0] = se::Value(message);
+        objFunc->call(jsArgs, nullptr);
+    });
+
+    se::ScriptEngine::getInstance()->addBeforeCleanupHook([objFunc] {
+        objFunc->decRef();
+    });
+
+    return true;
+}
+SE_BIND_FUNC(js_se_setErrMesageCallback) // NOLINT(readability-identifier-naming)
+
+static bool register_se_setErrMessageCallback(se::Object *obj) { // NOLINT(readability-identifier-naming)
+    se::Value jsb;
+    if (!obj->getProperty("jsb", &jsb)) {
+        jsb.setObject(se::Object::createPlainObject());
+        obj->setProperty("jsb", jsb);
+    }
+    auto *jsbObj = jsb.toObject();
+    jsbObj->defineFunction("onErrMessage", _SE(js_se_setErrMesageCallback));
+
+    return true;
+}
+
 static bool js_readFile_getParameters(se::State &s, ccstd::string &fullPath, std::shared_ptr<se::Value> &callbackPtr) { // NOLINT
     const auto &args = s.args();
     size_t argc = args.size();
@@ -982,6 +1028,7 @@ bool register_all_cocos_manual(se::Object *obj) { // NOLINT(readability-identifi
     register_filetuils_ext(obj);
     register_engine_Color_manual(obj);
     register_se_setExceptionCallback(obj);
+    register_se_setErrMessageCallback(obj);
     register_platform(obj);
     return true;
 }

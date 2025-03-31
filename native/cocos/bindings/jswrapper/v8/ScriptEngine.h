@@ -275,7 +275,7 @@ public:
     void clearException();
 
     using ExceptionCallback = std::function<void(const char *, const char *, const char *)>; // location, message, stack
-
+    using ErrMessageCallback = std::function<void(const char *)>;
     /**
      *  @brief Sets the callback function while an exception is fired.
      *  @param[in] cb The callback function to notify that an exception is fired.
@@ -287,6 +287,8 @@ public:
      *  @param[in] cb The callback function to notify that an exception is fired.
      */
     void setJSExceptionCallback(const ExceptionCallback &cb);
+
+    void setErrMessageCallback(const ErrMessageCallback &cb);
 
     /**
      *  @brief Gets the start time of script engine.

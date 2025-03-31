@@ -113,6 +113,11 @@ void Batcher2d::walk(Node* node, float parentOpacity, bool parentOpacityDirty) {
     if (!node->isActiveInHierarchy()) {
         return;
     }
+
+    if (node->isCulled() || node->isCulledScreen()) {
+        return;
+    }
+
     bool breakWalk = false;
     auto* entity = static_cast<RenderEntity*>(node->getUserData());
     bool opacityDirty = false;

@@ -145,6 +145,8 @@ se::Value oldConsoleWarn;
 se::Value oldConsoleError;
 se::Value oldConsoleAssert;
 
+ScriptEngine::ErrMessageCallback _errMessageCallback = nullptr;
+
 bool jsbConsoleFormatLog(State &state, cc::LogLevel level, int msgIndex = 0) {
     if (msgIndex < 0) {
         return false;
@@ -155,6 +157,10 @@ bool jsbConsoleFormatLog(State &state, cc::LogLevel level, int msgIndex = 0) {
     if ((argc - msgIndex) == 1) {
         ccstd::string const msg = args[msgIndex].toStringForce();
         cc::Log::logMessage(cc::LogType::KERNEL, level, "JS: %s", msg.c_str());
+        
+        if (level <= cc::LogLevel::ERR && _errMessageCallback) {
+            _errMessageCallback(msg.c_str());
+        }
     } else if (argc > 1) {
         ccstd::string msg = args[msgIndex].toStringForce();
         size_t pos;
@@ -167,6 +173,10 @@ bool jsbConsoleFormatLog(State &state, cc::LogLevel level, int msgIndex = 0) {
             }
         }
         cc::Log::logMessage(cc::LogType::KERNEL, level, "JS: %s", msg.c_str());
+
+        if (level <= cc::LogLevel::ERR && _errMessageCallback) {
+            _errMessageCallback(msg.c_str());
+        }
     }
 
     return true;
@@ -960,6 +970,11 @@ void ScriptEngine::setExceptionCallback(const ExceptionCallback &cb) {
 void ScriptEngine::setJSExceptionCallback(const ExceptionCallback &cb) {
     _jsExceptionCallback = cb;
 }
+
+void ScriptEngine::setErrMessageCallback(const ErrMessageCallback &cb) {
+    _errMessageCallback = cb;
+}
+
 
 v8::Local<v8::Context> ScriptEngine::_getContext() const { // NOLINT(readability-identifier-naming)
     return _context.Get(_isolate);
