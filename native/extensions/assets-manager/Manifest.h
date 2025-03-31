@@ -45,6 +45,7 @@ struct DownloadUnit {
     std::string storagePath;
     std::string customId;
     float size;
+    float realsize;
 };
 
 struct ManifestAsset {
@@ -53,6 +54,7 @@ struct ManifestAsset {
     bool compressed;
     float size;
     int downloadState;
+    float realsize;
 };
 
 using DownloadUnits = std::unordered_map<std::string, DownloadUnit>;

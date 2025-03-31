@@ -49,6 +49,7 @@
 #define KEY_GROUP           "group"
 #define KEY_COMPRESSED      "compressed"
 #define KEY_SIZE            "size"
+#define KEY_REALSIZE        "realsize"
 #define KEY_COMPRESSED_FILE "compressedFile"
 #define KEY_DOWNLOAD_STATE  "downloadState"
 
@@ -289,9 +290,10 @@ void Manifest::genResumeAssetsList(DownloadUnits *units) const {
         if (asset.downloadState != DownloadState::SUCCESSED && asset.downloadState != DownloadState::UNMARKED) {
             DownloadUnit unit;
             unit.customId = it.first;
-            unit.srcUrl = _packageUrl + asset.path;
+            unit.srcUrl = _packageUrl + asset.path + "?md5=" + asset.md5;
             unit.storagePath = _manifestRoot + asset.path;
             unit.size = asset.size;
+            unit.realsize = asset.realsize;
             units->emplace(unit.customId, unit);
         }
     }
@@ -436,6 +438,12 @@ Manifest::Asset Manifest::parseAsset(const std::string &path, const rapidjson::V
         asset.size = static_cast<float>(json[KEY_SIZE].GetInt());
     } else {
         asset.size = 0;
+    }
+
+    if (json.HasMember(KEY_REALSIZE) && json[KEY_REALSIZE].IsInt()) {
+        asset.realsize = static_cast<float>(json[KEY_REALSIZE].GetInt());
+    } else {
+        asset.realsize = 0;
     }
 
     if (json.HasMember(KEY_DOWNLOAD_STATE) && json[KEY_DOWNLOAD_STATE].IsInt()) {

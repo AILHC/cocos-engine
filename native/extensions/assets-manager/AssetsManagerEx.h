@@ -156,6 +156,10 @@ public:
         return _downloadResumed;
     };
 
+    double getRealTotalBytes() const {
+        return _realTotalSize;
+    }
+
     /** @brief Gets the total byte size to be downloaded of the update, this will only be available after READY_TO_UPDATE state, under unknown states it will return 0 by default.
      */
     double getTotalBytes() const {
@@ -391,6 +395,8 @@ private:
 
     //! Total file size need to be downloaded (sum of all files)
     double _totalSize = 0.F;
+
+    double _realTotalSize = 0.F;
 
     //! Total downloaded file size (sum of all downloaded files)
     double _totalDownloaded = 0.F;

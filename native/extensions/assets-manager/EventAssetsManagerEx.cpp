@@ -68,4 +68,8 @@ int EventAssetsManagerEx::getTotalFiles() const {
     return _manager->getTotalFiles();
 }
 
+double EventAssetsManagerEx::getRealTotalBytes() const {
+    return _manager->getRealTotalBytes();
+}
+
 NS_CC_EXT_END

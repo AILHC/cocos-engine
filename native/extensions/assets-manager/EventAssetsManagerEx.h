@@ -89,6 +89,8 @@ public:
 
     int getTotalFiles() const;
 
+    double getRealTotalBytes() const;
+
     /** Constructor */
     EventAssetsManagerEx(const std::string &eventName, cc::extension::AssetsManagerEx *manager, EventCode code, std::string assetId = "", std::string message = "", int curleCode = 0, int curlmCode = 0);
 

@@ -683,7 +683,7 @@ void AssetsManagerEx::prepareUpdateAsync(const PrepareUpdateFinishedCallback &cb
     _nextSavePoint = 0;
     _percent = _percentByFile = 0.F;
     _sizeCollected = 0;
-    _totalDownloaded = _totalSize = 0.0;
+    _realTotalSize = _totalDownloaded = _totalSize = 0.0;
     _downloadResumed = false;
     _downloadedSize.clear();
     _totalEnabled = false;
@@ -710,6 +710,7 @@ void AssetsManagerEx::prepareUpdateAsync(const PrepareUpdateFinishedCallback &cb
                 const DownloadUnit &unit = iter.second;
                 if (unit.size > 0) {
                     _totalSize += unit.size;
+                    _realTotalSize += unit.realsize;
                 }
             }
         } else {
@@ -745,9 +746,11 @@ void AssetsManagerEx::prepareUpdateAsync(const PrepareUpdateFinishedCallback &cb
                     unit.srcUrl = packageUrl + path + "?md5=" + diff.asset.md5;
                     unit.storagePath = _tempStoragePath + path;
                     unit.size = diff.asset.size;
+                    unit.realsize = diff.asset.realsize;
                     _downloadUnits.emplace(unit.customId, unit);
                     _tempManifest->setAssetDownloadState(it.first, Manifest::DownloadState::UNSTARTED);
                     _totalSize += unit.size;
+                    _realTotalSize += unit.realsize;
                 }
             }
             // Start updating the temp manifest
@@ -764,6 +767,7 @@ void AssetsManagerEx::startUpdate() {
     auto cb = [this]() {
         if (_updateState == State::READY_TO_UPDATE) {
             _totalSize = 0;
+            _realTotalSize = 0;
             _updateState = State::UPDATING;
             std::string msg;
             if (_downloadResumed) {
@@ -1071,6 +1075,7 @@ void AssetsManagerEx::onProgress(double total, double downloaded, const std::str
         // Check download unit size existance, if not exist collect size in total size
         if (_downloadUnits[customId].size == 0) {
             _totalSize += total;
+            _realTotalSize += total;
             _sizeCollected++;
             // All collected, enable total size
             if (_sizeCollected == _totalToDownload) {
@@ -1132,6 +1137,7 @@ void AssetsManagerEx::batchDownload() {
         const DownloadUnit &unit = iter.second;
         if (unit.size > 0) {
             _totalSize += unit.size;
+            _realTotalSize += unit.realsize;
             _sizeCollected++;
         }
 
