@@ -559,6 +559,23 @@ export class Graphics extends UIRenderer {
         this._markForUpdateRenderData();
     }
 
+    public clearRenderData (): void {
+        if (!this.impl) {
+            return;
+        }
+        this.impl?.clearRenderData();
+        this._isDrawing = false;
+        if (JSB) {
+            this._graphicsNativeProxy.clear();// need native
+        } else if (this.model) {
+            for (let i = 0; i < this.model.subModels.length; i++) {
+                const subModel = this.model.subModels[i];
+                subModel.inputAssembler.indexCount = 0;
+            }
+        }
+        this._markForUpdateRenderData();
+    }
+
     /**
      * @en
      * Causes the point of the pen to move back to the start of the current path.

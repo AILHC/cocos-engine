@@ -174,11 +174,17 @@ export class Impl {
         this.pathLength = 0;
         this.pathOffset = 0;
         this.pointsOffset = 0;
-        this.dataOffset = 0;
         this._curPath = null;
         this.paths.length = 0;
         this._points.length = 0;
-
+        this.clearRenderData();
+    }
+    /**
+     * @en Clear render data.
+     * @zh 清除渲染数据。
+     */
+    public clearRenderData (): void {
+        this.dataOffset = 0;
         const dataList = this._renderDataList;
         for (let i = 0, l = dataList.length; i < l; i++) {
             const data = dataList[i];
@@ -189,7 +195,6 @@ export class Impl {
             MeshRenderData.remove(data);
             data.removeRenderDrawInfo(this._comp);
         }
-
         this._renderDataList.length = 0;
     }
 
