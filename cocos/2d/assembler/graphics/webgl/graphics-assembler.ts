@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 import { JSB } from 'internal:constants';
-import { Color, error, Vec3 } from '../../../../core';
+import { Color, Vec3 } from '../../../../core';
 import { IAssembler } from '../../../renderer/base';
 import { MeshRenderData } from '../../../renderer/render-data';
 import { IBatcher } from '../../../renderer/i-batcher';
@@ -80,38 +80,7 @@ export class GraphicsAssembler implements IAssembler {
             }
         }
     }
-    private getBatchRenderData (graphics: Graphics, vertexCount: number): MeshRenderData | null {
-        if (!_impl) {
-            return null;
-        }
 
-        const renderDataList = _impl.getRenderDataList();
-        let renderData: MeshRenderData | null = null;
-        let meshBuffer: MeshRenderData | null = null;
-        for (let i = 0; i < renderDataList.length; i++) {
-            renderData = renderDataList[i];
-            if (renderData.vertexStart + vertexCount > MAX_VERTEX || (renderData.vertexStart + vertexCount) * 3 > MAX_INDICES) {
-                continue;
-            } else {
-                meshBuffer = renderData;
-                break;
-            }
-        }
-        if (!meshBuffer) {
-            renderData = _impl.requestRenderData();
-            renderDataList.push(renderData);
-            meshBuffer = renderData;
-        }
-
-        if (meshBuffer && meshBuffer.vertexCount < vertexCount) {
-            const successed = meshBuffer.request(vertexCount, vertexCount * 3);
-            if (!successed) {
-                error(`GraphicsAssembler: request vertex buffer failed: ${vertexCount}`);
-                return null;
-            }
-        }
-        return meshBuffer;
-    }
     private getRenderData (graphics: Graphics, vertexCount: number): MeshRenderData | null {
         if (!_impl) {
             return null;
@@ -140,11 +109,7 @@ export class GraphicsAssembler implements IAssembler {
         }
 
         if (meshBuffer && meshBuffer.vertexCount < maxVertexCount) {
-            const successed = meshBuffer.request(vertexCount, vertexCount * 3);
-            if (!successed) {
-                error(`GraphicsAssembler: request vertex buffer failed: ${maxVertexCount}`);
-                return null;
-            }
+            meshBuffer.request(vertexCount, vertexCount * 3);
         }
 
         return renderData;
@@ -181,7 +146,7 @@ export class GraphicsAssembler implements IAssembler {
         graphics._markForUpdateRenderData();
     }
 
-    private _expandStroke_old (graphics: Graphics): void {
+    private _expandStroke (graphics: Graphics): void {
         const w = graphics.lineWidth * 0.5;
         const lineCap = graphics.lineCap;
         const lineJoin = graphics.lineJoin;
@@ -323,181 +288,8 @@ export class GraphicsAssembler implements IAssembler {
         _renderData = null;
         _impl = null;
     }
-    private _expandStroke (graphics: Graphics): void {
-        const w = graphics.lineWidth * 0.5;
-        const lineCap = graphics.lineCap;
-        const lineJoin = graphics.lineJoin;
-        const miterLimit = graphics.miterLimit;
 
-        _impl = graphics.impl;
-
-        if (!_impl) {
-            return;
-        }
-
-        const nCap = curveDivs(w, PI, _impl.tessTol);
-
-        this._calculateJoins(_impl, w, lineJoin, miterLimit);
-
-        const paths = _impl.paths;
-        // 修改顶点计算逻辑
-        let totalVertexCount = 0;
-        let currentBatchPaths: typeof paths = [];
-        let currentBatchVertexCount = 0;
-        let batchIndex = 0;
-        // 首先计算每个 path 的顶点数并进行分组
-        for (let i = _impl.pathOffset, l = _impl.pathLength; i < l; i++) {
-            const path = paths[i];
-            const pointsLength = path.points.length;
-
-            // 计算当前 path 需要的顶点数
-            let pathVertexCount = 0;
-            if (lineJoin === LineJoin.ROUND) {
-                pathVertexCount = (pointsLength + path.bevel * (nCap + 2) + 1) * 2;
-            } else {
-                pathVertexCount = (pointsLength + path.bevel * 5 + 1) * 2;
-            }
-
-            if (!path.closed) {
-                if (lineCap === LineCap.ROUND) {
-                    pathVertexCount += (nCap * 2 + 2) * 2;
-                } else {
-                    pathVertexCount += (3 + 3) * 2;
-                }
-            }
-
-            // 检查是否需要开始新的批次
-            // if (currentBatchVertexCount + pathVertexCount > Math.floor(MAX_VERTEX * 0.6)) {
-            if (currentBatchVertexCount + pathVertexCount > MAX_VERTEX - 1) {
-                // 处理当前批次
-                this._processBatch(graphics, currentBatchPaths, currentBatchVertexCount, batchIndex);
-                // 重置批次数据
-                currentBatchPaths = [];
-                currentBatchVertexCount = 0;
-                batchIndex++;
-            }
-
-            currentBatchPaths.push(path);
-            currentBatchVertexCount += pathVertexCount;
-            totalVertexCount += pathVertexCount;
-        }
-
-        // 处理最后一个批次
-        if (currentBatchPaths.length > 0) {
-            this._processBatch(graphics, currentBatchPaths, currentBatchVertexCount, batchIndex);
-        }
-
-        _renderData = null;
-        _impl = null;
-    }
-    // 添加新方法处理单个批次
-    private _processBatch (graphics: Graphics, batchPaths: any[], vertexCount: number, batch: number): void {
-        const w = graphics.lineWidth * 0.5;
-        const _impl = graphics.impl;
-        if (!_impl) return;
-        const lineCap = graphics.lineCap;
-        const lineJoin = graphics.lineJoin;
-        const meshBuffer = this.getBatchRenderData(graphics, vertexCount);
-        if (!meshBuffer) return;
-
-        const vData = meshBuffer.vData;
-        const iData = meshBuffer.iData;
-        _renderData = meshBuffer;
-        const nCap = curveDivs(w, PI, _impl.tessTol);
-        // 处理每个 path
-        for (const path of batchPaths) {
-            const pts = path.points;
-            const pointsLength = pts.length;
-            const offset = meshBuffer.vertexStart;
-
-            let p0: Point;
-            let p1: Point;
-            let start = 0;
-            let end = 0;
-            const loop = path.closed;
-            if (loop) {
-                // Looping
-                p0 = pts[pointsLength - 1];
-                p1 = pts[0];
-                start = 0;
-                end = pointsLength;
-            } else {
-                // Add cap
-                p0 = pts[0];
-                p1 = pts[1];
-                start = 1;
-                end = pointsLength - 1;
-            }
-
-            p1 = p1 || p0;
-
-            if (!loop) {
-                // Add cap
-                const dPos = new Point(p1.x, p1.y);
-                dPos.subtract(p0);
-                dPos.normalize();
-
-                const dx = dPos.x;
-                const dy = dPos.y;
-
-                if (lineCap === LineCap.BUTT) {
-                    this._buttCapStart(p0, dx, dy, w, 0);
-                } else if (lineCap === LineCap.SQUARE) {
-                    this._buttCapStart(p0, dx, dy, w, w);
-                } else if (lineCap === LineCap.ROUND) {
-                    this._roundCapStart(p0, dx, dy, w, nCap);
-                }
-            }
-
-            for (let j = start; j < end; ++j) {
-                if (lineJoin === LineJoin.ROUND) {
-                    this._roundJoin(p0, p1, w, w, nCap);
-                } else if ((p1.flags & (PointFlags.PT_BEVEL | PointFlags.PT_INNERBEVEL)) !== 0) {
-                    this._bevelJoin(p0, p1, w, w);
-                } else {
-                    this._vSet(p1.x + p1.dmx * w, p1.y + p1.dmy * w, 1);
-                    this._vSet(p1.x - p1.dmx * w, p1.y - p1.dmy * w, -1);
-                }
-
-                p0 = p1;
-                p1 = pts[j + 1];
-            }
-
-            if (loop) {
-                // Loop it
-                const vDataOffset = offset * attrBytes;
-                this._vSet(vData[vDataOffset], vData[vDataOffset + 1], 1);
-                this._vSet(vData[vDataOffset + attrBytes], vData[vDataOffset + attrBytes + 1], -1);
-            } else {
-                // Add cap
-                const dPos = new Point(p1.x, p1.y);
-                dPos.subtract(p0);
-                dPos.normalize();
-
-                const dx = dPos.x;
-                const dy = dPos.y;
-
-                if (lineCap === LineCap.BUTT) {
-                    this._buttCapEnd(p1, dx, dy, w, 0);
-                } else if (lineCap === LineCap.SQUARE) {
-                    this._buttCapEnd(p1, dx, dy, w, w);
-                } else if (lineCap === LineCap.ROUND) {
-                    this._roundCapEnd(p1, dx, dy, w, nCap);
-                }
-            }
-
-            // stroke indices
-            let indicesOffset = meshBuffer.indexStart;
-            for (let begin = offset + 2, over = meshBuffer.vertexStart; begin < over; begin++) {
-                iData[indicesOffset++] = begin - 2;
-                iData[indicesOffset++] = begin - 1;
-                iData[indicesOffset++] = begin;
-            }
-
-            meshBuffer.indexStart = indicesOffset;
-        }
-    }
-    private _expandFill_old (graphics: Graphics): void {
+    private _expandFill (graphics: Graphics): void {
         _impl = graphics.impl;
         if (!_impl) {
             return;
@@ -574,107 +366,7 @@ export class GraphicsAssembler implements IAssembler {
         _renderData = null;
         _impl = null;
     }
-    private _expandFill (graphics: Graphics): void {
-        _impl = graphics.impl;
-        if (!_impl) {
-            return;
-        }
 
-        const paths = _impl.paths;
-
-        // 分批处理相关变量
-        let currentBatchPaths: typeof paths = [];
-        let currentBatchVertexCount = 0;
-        let batchIndex = 0;
-        // 遍历所有路径，进行分组
-        for (let i = _impl.pathOffset, l = _impl.pathLength; i < l; i++) {
-            const path = paths[i];
-            const pointsLength = path.points.length;
-
-            if (pointsLength === 0) {
-                continue;
-            }
-
-            // 如果当前批次加上新path会超出限制，先处理当前批次
-            // if (currentBatchVertexCount + pointsLength > Math.floor(MAX_VERTEX * 0.6)) {
-            if (currentBatchVertexCount + pointsLength > MAX_VERTEX - 1) {
-                this._processFillBatch(graphics, currentBatchPaths);
-                currentBatchPaths = [];
-                currentBatchVertexCount = 0;
-                batchIndex++;
-            }
-
-            currentBatchPaths.push(path);
-            currentBatchVertexCount += pointsLength;
-        }
-
-        // 处理最后一批
-        if (currentBatchPaths.length > 0) {
-            this._processFillBatch(graphics, currentBatchPaths);
-        }
-
-        _renderData = null;
-        _impl = null;
-    }
-    // 新增处理单个批次的方法
-    private _processFillBatch (graphics: Graphics, batchPaths: any[]): void {
-        // 计算当前批次的顶点数
-        let vertexCount = 0;
-        for (const path of batchPaths) {
-            vertexCount += path.points.length;
-        }
-
-        const renderData = this.getBatchRenderData(graphics, vertexCount);
-        if (!renderData) {
-            return;
-        }
-        _renderData = renderData;
-        const meshBuffer = renderData;
-        const vData = meshBuffer.vData;
-        const iData = meshBuffer.iData;
-        // 处理每个路径
-        for (const path of batchPaths) {
-            const pts = path.points as Point[];
-            const pointsLength = pts.length;
-
-            // Calculate shape vertices
-            const vertexOffset = renderData.vertexStart;
-
-            for (let j = 0; j < pointsLength; ++j) {
-                this._vSet(pts[j].x, pts[j].y);
-            }
-
-            let indicesOffset = renderData.indexStart;
-
-            if (path.complex) {
-                const earcutData: number[] = [];
-                for (let j = vertexOffset, end = renderData.vertexStart; j < end; j++) {
-                    let vDataOffset = j * attrBytes;
-                    earcutData.push(vData[vDataOffset++]);
-                    earcutData.push(vData[vDataOffset++]);
-                    earcutData.push(vData[vDataOffset++]);
-                }
-
-                const newIndices = Earcut(earcutData, null, 3);
-                if (!newIndices || newIndices.length === 0) {
-                    continue;
-                }
-
-                for (let j = 0, nIndices = newIndices.length; j < nIndices; j++) {
-                    iData[indicesOffset++] = newIndices[j] + vertexOffset;
-                }
-            } else {
-                const first = vertexOffset;
-                for (let start = vertexOffset + 2, end = meshBuffer.vertexStart; start < end; start++) {
-                    iData[indicesOffset++] = first;
-                    iData[indicesOffset++] = start - 1;
-                    iData[indicesOffset++] = start;
-                }
-            }
-
-            meshBuffer.indexStart = indicesOffset;
-        }
-    }
     private _calculateJoins (impl: Impl, w: number, lineJoin: LineJoin, miterLimit: number): void {
         let iw = 0.0;
 
@@ -969,10 +661,6 @@ export class GraphicsAssembler implements IAssembler {
         }
 
         const meshBuffer = _renderData;
-        if (meshBuffer.vertexStart >= MAX_VERTEX) {
-            error('meshBuffer vertex count >= MAX_VERTEX');
-            return;
-        }
         let dataOffset = meshBuffer.vertexStart * attrBytes;
         const vData = meshBuffer.vData;
         // vec3.set(_tempVec3, x, y, 0);

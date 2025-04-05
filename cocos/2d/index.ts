@@ -45,9 +45,10 @@ import * as VertexFormat from './renderer/vertex-format';
 import { earcut } from "./assembler/graphics/webgl/earcut"
 import { Point } from './assembler/graphics/webgl/impl';
 import { PointFlags } from './assembler/graphics/types';
-
+import * as graphicsHelper from './assembler/graphics/helper'
 const graphics_export = {
     earcut,
+    helper: graphicsHelper,
     Point,
     PointFlags,
     UIVertexFormat: VertexFormat
