@@ -34,6 +34,12 @@ import './event';
 
 import './renderer/batcher-2d';
 
+import * as VertexFormat from './renderer/vertex-format';
+import { earcut } from './assembler/graphics/webgl/earcut';
+import { Point } from './assembler/graphics/webgl/impl';
+import { PointFlags } from './assembler/graphics/types';
+import * as graphicsHelper from './assembler/graphics/helper';
+
 export * from './assets';
 export * from './framework';
 export * from './components';
@@ -41,19 +47,14 @@ export * from './renderer/render-data';
 export * from './renderer/base';
 export * from './renderer/deprecated';
 export * from './utils';
-import * as VertexFormat from './renderer/vertex-format';
-import { earcut } from "./assembler/graphics/webgl/earcut"
-import { Point } from './assembler/graphics/webgl/impl';
-import { PointFlags } from './assembler/graphics/types';
-import * as graphicsHelper from './assembler/graphics/helper'
 const graphics_export = {
     earcut,
     helper: graphicsHelper,
     Point,
     PointFlags,
-    UIVertexFormat: VertexFormat
-}
-export { graphics_export }
+    UIVertexFormat: VertexFormat,
+};
+export { graphics_export };
 export {
     MeshBuffer,
     StencilManager,

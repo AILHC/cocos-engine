@@ -159,7 +159,7 @@ const measureCache = new LRUCache(MAX_CACHE_SIZE);
 
 const WORD_REG = /([a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôûа-яА-ЯЁё]+|\S)/;
 // eslint-disable-next-line no-useless-escape
-const SYMBOL_REG = /^[!,.:;'}\]%\?>、‘“》？。，！]/;
+const SYMBOL_REG = /^[!,.:;'}\]%\?>、‘“＂”：》()（）【】？。，！]/;
 
 const CHAR_SET = '[a-zA-Z0-9ÄÖÜäöüßéèçàùêâîôûаíìÍÌïÁÀáàÉÈÒÓòóŐőÙÚŰúűñÑæÆœŒÃÂãÔõěščřžýáíéóúůťďňĚŠČŘŽÁÍÉÓÚŤżźśóńłęćąŻŹŚÓŃŁĘĆĄ-яА-ЯЁёáàảạãăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệiíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđÁÀẢẠÃĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆIÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴĐ]';
 const LAST_WORD_REG = new RegExp(`(${CHAR_SET}+|\\S)$`);
@@ -492,13 +492,15 @@ export function fragmentText (stringToken: string, allWidth: number, maxWidth: n
         // In condition that a symbol appears at the beginning of the new line, we will move the last word of this line to the new line.
         // If there is only one word in this line, we will keep the first character of this word and move the rest of characters to the new line.
         if (WRAP_INSPECTION) {
-            if (SYMBOL_REG.test(sLine || tmpText)) {
-                result = LAST_WORD_REG.exec(sText);
-                fuzzyLen -= result ? result[0].length : 0;
-                if (fuzzyLen === 0) { fuzzyLen = 1; }
+            for (let i = 0; i < 2; i++) {
+                if (SYMBOL_REG.test(sLine || tmpText)) {
+                    result = LAST_WORD_REG.exec(sText);
+                    fuzzyLen -= result ? result[0].length : 0;
+                    if (fuzzyLen === 0) { fuzzyLen = 1; }
 
-                sLine = _safeSubstring(text, fuzzyLen);
-                sText = _safeSubstring(text, 0, fuzzyLen);
+                    sLine = _safeSubstring(text, fuzzyLen);
+                    sText = _safeSubstring(text, 0, fuzzyLen);
+                }
             }
         }
 

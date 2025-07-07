@@ -27,6 +27,8 @@ import { ccclass } from 'cc.decorator';
 import { Asset } from '../../asset/assets';
 import { cclegacy } from '../../core';
 
+const BMFONT_NAME = 'JYFZ';
+
 /**
  * @en Class for Font handling.
  * @zh 字体资源类。
@@ -35,6 +37,16 @@ import { cclegacy } from '../../core';
 export class Font extends Asset {
     constructor (name?: string) {
         super(name);
+    }
+
+    private _checkedBmfontOutline: boolean | undefined = undefined;
+    isBmfontOutlineFont (): boolean {
+        let check_ret = this._checkedBmfontOutline;
+        if (check_ret === undefined) {
+            check_ret = this.name === BMFONT_NAME;
+            this._checkedBmfontOutline = check_ret;
+        }
+        return check_ret;
     }
 }
 

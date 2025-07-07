@@ -25,7 +25,7 @@
 
 import { ccclass, executeInEditMode, executionOrder, help, menu, multiline, type, displayOrder, serializable, editable } from 'cc.decorator';
 import { DEBUG, DEV, EDITOR } from 'internal:constants';
-import { Font, SpriteAtlas, TTFFont, SpriteFrame } from '../assets';
+import { Font, SpriteAtlas, TTFFont, SpriteFrame, BitmapFont } from '../assets';
 import { EventTouch } from '../../input/types';
 import { assert, warnID, Color, Vec2, CCObjectFlags, cclegacy, js, Size } from '../../core';
 import { HtmlTextParser, IHtmlTextParserResultObj, IHtmlTextParserStack } from '../utils/html-text-parser';
@@ -44,6 +44,7 @@ import {
     getEnglishWordPartAtLast,
     getSymbolAt,
 } from '../utils/text-utils';
+import { BmfontOutlineHelper } from '../assembler/label/bmfont-outline-helper';
 
 const _htmlTextParser = new HtmlTextParser();
 const RichTextChildName = 'RICHTEXT_CHILD';
@@ -170,7 +171,8 @@ export class RichText extends Component {
             return;
         }
 
-        this._string = value;
+        this._string = this.formatStr(value);
+        this.checkChangeFontByInvalidChar();
         this._updateRichTextStatus();
     }
 
@@ -512,9 +514,57 @@ export class RichText extends Component {
     public onLoad (): void {
         this.node.on(NodeEventType.LAYER_CHANGED, this._applyLayer, this);
         this.node.on(NodeEventType.ANCHOR_CHANGED, this._updateRichTextPosition, this);
+
+        this._string = this.formatStr(this._string);
+
+        if (this._font && this._font.isBmfontOutlineFont()) {
+            this._cacheBmfOutlineFont = this._font as any as BitmapFont;
+        }
+    }
+
+    private _cacheBmfOutlineFont: BitmapFont | null = null;
+    get cacheBmfOutlineFont (): BitmapFont | null {
+        return this._cacheBmfOutlineFont;
+    }
+
+    formatStr (v: string): string {
+        return v;
+    }
+
+    checkChangeFontByInvalidChar (): void {
+        const font = this._cacheBmfOutlineFont;
+        if (font) {
+            const hasInvalid = BmfontOutlineHelper.hasInvalidChar(font, this._string);
+            if (hasInvalid) {
+                if (!this._isSystemFontUsed) {
+                    this.font = null;
+                }
+            } else if (this._isSystemFontUsed) {
+                this.font = font as any;
+            }
+        }
+    }
+
+    needChangeFont (): boolean {
+        const font = this._cacheBmfOutlineFont;
+        if (font) {
+            const hasInvalid = BmfontOutlineHelper.hasInvalidChar(font, this._string);
+            return hasInvalid;
+        }
+        return false;
     }
 
     public onEnable (): void {
+        const need = this.needChangeFont();
+        if (need) {
+            this._font = null;
+            this._layoutDirty = true;
+            this._isSystemFontUsed = true;
+        }
+
+        this._font || this._isSystemFontUsed || (this.useSystemFont = !0);
+        this._isSystemFontUsed && !this._fontFamily && (this.fontFamily = 'Arial');
+
         if (this.handleTouchEvent) {
             this._addEventListeners();
         }
@@ -754,6 +804,8 @@ export class RichText extends Component {
         let label: ISegment;
         if (this._labelSegmentsCache.length === 0) {
             label = this._createFontLabel(s);
+            label.node.active = true;
+            (label.comp as Label).ignoreCheckBmfOutline = true;
             this._labelSegmentsCache.push(label);
         } else {
             label = this._labelSegmentsCache[0];
@@ -841,6 +893,8 @@ export class RichText extends Component {
         let labelSegment: ISegment;
         if (this._labelSegmentsCache.length === 0) {
             labelSegment = this._createFontLabel(stringToken);
+            labelSegment.node.active = true;
+            (labelSegment.comp as Label).ignoreCheckBmfOutline = true;
         } else {
             labelSegment = this._labelSegmentsCache.pop()!;
             const label = labelSegment.node.getComponent(Label);
@@ -1305,6 +1359,8 @@ this._measureText(styleIndex) as unknown as (s: string) => number,
                 label.enableOutline = true;
                 label.outlineColor = this._convertLiteralColorValue(textStyle.outline.color);
                 label.outlineWidth = textStyle.outline.width;
+            } else {
+                label.enableOutline = false;
             }
 
             label.fontSize = textStyle.size || this._fontSize;
@@ -1316,6 +1372,8 @@ this._measureText(styleIndex) as unknown as (s: string) => number,
                 labelSeg.clickHandler = event.click || '';
                 labelSeg.clickParam = event.param || '';
             }
+        } else {
+            label.enableOutline = false;
         }
 
         label.cacheMode = this._cacheMode;
@@ -1328,6 +1386,12 @@ this._measureText(styleIndex) as unknown as (s: string) => number,
         }
         label.useSystemFont = this._isSystemFontUsed;
         label.lineHeight = this._lineHeight;
+
+        if (this._font && this._font.isBmfontOutlineFont()) {
+            label.usingBmfOutline = true;
+        } else {
+            label.usingBmfOutline = false;
+        }
 
         label.updateRenderData(true);
     }
@@ -1344,6 +1408,7 @@ this._measureText(styleIndex) as unknown as (s: string) => number,
         label.isBold = false;
         label.isItalic = false;
         label.isUnderline = false;
+        label.usingBmfOutline = false;
     }
 }
 

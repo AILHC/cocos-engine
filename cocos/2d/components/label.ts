@@ -24,11 +24,11 @@
 */
 
 import { ccclass, help, executionOrder, menu, displayOrder, visible, multiline, type, serializable, editable } from 'cc.decorator';
-import { BYTEDANCE, EDITOR, JSB } from 'internal:constants';
+import { BYTEDANCE, EDITOR, EDITOR_NOT_IN_PREVIEW, JSB } from 'internal:constants';
 import { minigame } from 'pal/minigame';
 import { BitmapFont, Font, SpriteFrame } from '../assets';
 import { ImageAsset, Texture2D } from '../../asset/assets';
-import { ccenum, cclegacy, Color, Vec2 } from '../../core';
+import { ccenum, cclegacy, Color, Vec2, warn } from '../../core';
 import { IBatcher } from '../renderer/i-batcher';
 import { FontAtlas } from '../assets/bitmap-font';
 import { CanvasPool, ISharedLabelData, LetterRenderTexture } from '../assembler/label/font-utils';
@@ -42,6 +42,8 @@ import { TextOutputLayoutData, TextOutputRenderData } from '../assembler/label/t
 import type { RenderData } from '../renderer/render-data';
 import type { LetterFont } from '../assembler/label/letter-font';
 import type { TTF } from '../assembler/label/ttf';
+import { BmfontOutlineHelper } from '../assembler/label/bmfont-outline-helper';
+import { NodeEventType } from '../../scene-graph/node-event';
 
 const tempColor = Color.WHITE.clone();
 /**
@@ -207,11 +209,11 @@ export class Label extends UIRenderer {
      */
     public static _canvasPool = CanvasPool.getInstance();
 
-    public get lastString() {
+    public get lastString (): string {
         return this._lastString;
     }
 
-    public set lastString(value) {
+    public set lastString (value) {
         this._lastString = value;
     }
 
@@ -231,15 +233,17 @@ export class Label extends UIRenderer {
         if (value === null || value === undefined) {
             value = '';
         } else {
-            value = value.toString();
+            value = this.formatStr(value.toString());
         }
 
         if (this._string === value) {
             return;
         }
 
+        this._hasInvalidChar = undefined;
         this._string = value;
         this._markForUpdateRenderData();
+        this.checkChangeFontByInvalidChar();
     }
 
     /**
@@ -431,6 +435,8 @@ export class Label extends UIRenderer {
         this._isSystemFontUsed = !!value;
         if (value) {
             this.font = null;
+        } else if (this._cacheBmfOutlineFont) {
+            this.font = this._cacheBmfOutlineFont;
         }
         this._flushAssembler();
         this._markForUpdateRenderData();
@@ -488,10 +494,24 @@ export class Label extends UIRenderer {
         // if (value && this._isSystemFontUsed)
         //     this._isSystemFontUsed = false;
 
+        if (value) {
+            if (this._cacheBmfOutlineFont == null && value.isBmfontOutlineFont()) {
+                this._cacheBmfOutlineFont = this._font as any as BitmapFont;
+            } else if (value !== this._cacheBmfOutlineFont) {
+                this._cacheBmfOutlineFont = null;
+            }
+        }
+
         this.destroyRenderData();
 
         this._fontAtlas = null;
         this.updateRenderData(true);
+
+        if (!this._isSystemFontUsed && this._cacheBmfOutlineFont && value === this._cacheBmfOutlineFont) {
+            this.usingBmfOutline = !this.isContentHasInvalidChar;
+        } else {
+            this.usingBmfOutline = false;
+        }
     }
 
     /**
@@ -608,7 +628,7 @@ export class Label extends UIRenderer {
      ** 描边效果组件,用于字体描边,只能用于系统字体或 ttf 字体。
      **/
     @editable
-    @visible(function (this: Label) { return !(this._font instanceof BitmapFont); })
+    //@visible(function (this: Label) { return !(this._font instanceof BitmapFont); })
     @displayOrder(19)
     get enableOutline (): boolean {
         return this._enableOutline;
@@ -617,6 +637,7 @@ export class Label extends UIRenderer {
         if (this._enableOutline === value) return;
         this._enableOutline = value;
         this._markForUpdateRenderData();
+        this._updateBmfontOutlineColor();
     }
 
     /**
@@ -627,7 +648,7 @@ export class Label extends UIRenderer {
      * 改变描边的颜色。
      */
     @editable
-    @visible(function (this: Label) { return this._enableOutline && !(this._font instanceof BitmapFont); })
+    //@visible(function (this: Label) { return this._enableOutline && !(this._font instanceof BitmapFont); })
     @displayOrder(20)
     get outlineColor (): Color {
         return this._outlineColor;
@@ -636,6 +657,7 @@ export class Label extends UIRenderer {
         if (this._outlineColor === value) return;
         this._outlineColor.set(value);
         this._markForUpdateRenderData();
+        this._updateBmfontOutlineColor();
     }
 
     /**
@@ -905,7 +927,99 @@ export class Label extends UIRenderer {
             this.fontFamily = 'Arial';
         }
 
+        this.checkChangeFontByInvalidChar();
         this._applyFontTexture();
+    }
+
+    public onLoad (): void {
+        super.onLoad();
+
+        this._string = this.formatStr(this._string);
+        this._hasInvalidChar = undefined;
+
+        if (this._font && this._font.isBmfontOutlineFont()) {
+            this._cacheBmfOutlineFont = this._font as any as BitmapFont;
+        }
+    }
+
+    formatStr (v: string): string {
+        return v;
+    }
+
+    private _ignoreCheckBmfOutline = false;
+    set ignoreCheckBmfOutline (value: boolean) {
+        this._ignoreCheckBmfOutline = value;
+    }
+
+    private _cacheBmfOutlineFont: BitmapFont | null = null;
+    get cacheBmfOutlineFont (): BitmapFont | null {
+        return this._cacheBmfOutlineFont;
+    }
+
+    private _usingBmfOutline = false;
+    get usingBmfOutline (): boolean {
+        return this._usingBmfOutline;
+    }
+
+    set usingBmfOutline (value: boolean) {
+        const pre = this._usingBmfOutline;
+        this._usingBmfOutline = value;
+        if (pre !== value && value) {
+            this._updateBmfontOutlineColor();
+        }
+    }
+
+    private _bmfOutlineColor: Color = Color.BLACK.clone();
+
+    get bmfOutlineColor (): Color {
+        return this._bmfOutlineColor;
+    }
+
+    private _updateBmfontOutlineColor (): void {
+        if (this._usingBmfOutline && this._cacheBmfOutlineFont) {
+            const cur = this._outlineColor;
+            const a = this._enableOutline ? cur.a : 0;
+            this._bmfOutlineColor.set(cur.r, cur.g, cur.b, a);
+        }
+    }
+
+    private get isContentHasInvalidChar (): boolean {
+        if (this._hasInvalidChar === undefined) {
+            if (this._cacheBmfOutlineFont == null) {
+                return false;
+            }
+            if (EDITOR) {
+                this._hasInvalidChar = false;
+            } else {
+                const hasInvalid = BmfontOutlineHelper.hasInvalidChar(this._cacheBmfOutlineFont, this._string);
+                this._hasInvalidChar = hasInvalid;
+            }
+        }
+        return this._hasInvalidChar;
+    }
+
+    private _hasInvalidChar: boolean | undefined = undefined;
+
+    checkChangeFontByInvalidChar (): void {
+        if (this._ignoreCheckBmfOutline) {
+            return;
+        }
+
+        const font = this._cacheBmfOutlineFont;
+        if (font) {
+            const hasInvalid = this.isContentHasInvalidChar;
+            if (hasInvalid) {
+                if (!this._isSystemFontUsed) {
+                    this.useSystemFont = true;
+                }
+            } else if (this._isSystemFontUsed) {
+                this.useSystemFont = false;
+            } else {
+                this.usingBmfOutline = true;
+            }
+        } else {
+            this.usingBmfOutline = false;
+        }
     }
 
     private destroyTtfSpriteFrame (): void {
@@ -962,8 +1076,12 @@ export class Label extends UIRenderer {
         }
         this._letterTexture = null;
     }
-    public onUpdateRenderFailed() {
-        if (this.cacheMode != CacheMode.NONE) {
+    public onUpdateRenderFailed (): void {
+        if (EDITOR_NOT_IN_PREVIEW) {
+            return;
+        }
+
+        if (this.cacheMode !== CacheMode.NONE) {
             this.cacheMode = CacheMode.NONE;
         }
     }
@@ -992,7 +1110,7 @@ export class Label extends UIRenderer {
 
     // Cannot use the base class methods directly because BMFont and CHAR cannot be updated in assambler with just color.
     protected _updateColor (): void {
-        this._lastString = "";
+        this._lastString = '';
         super._updateColor();
         this._markForUpdateRenderData();
     }
@@ -1043,7 +1161,7 @@ export class Label extends UIRenderer {
         if (!this.renderData) {
             if (this._assembler && this._assembler.createData) {
                 this._renderData = this._assembler.createData(this) as RenderData;
-                this.renderData!.material = this.material;
+                this.renderData!.material = this.getRenderMaterial(0);
                 this._updateColor();
             }
         }

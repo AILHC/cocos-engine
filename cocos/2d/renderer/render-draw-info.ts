@@ -341,4 +341,33 @@ export class RenderDrawInfo {
             }
         }
     }
+
+    public fillRender2dBufferWithOutlineColor (vertexDataArr: IRenderData[], r: number, g: number, b: number, a: number): void {
+        if (JSB) {
+            if (!this._render2dBuffer) {
+                return;
+            }
+            const fillLength = Math.min(this._vbCount, vertexDataArr.length);
+            let bufferOffset = 0;
+            let uvOffset = 3;
+            let colorOffset = 5;
+            for (let i = 0; i < fillLength; i++) {
+                const temp = vertexDataArr[i];
+                this._render2dBuffer[bufferOffset] = temp.x;
+                this._render2dBuffer[bufferOffset + 1] = temp.y;
+                this._render2dBuffer[bufferOffset + 2] = temp.z;
+
+                this._render2dBuffer[uvOffset] = -1;
+
+                this._render2dBuffer[colorOffset] = r;
+                this._render2dBuffer[colorOffset + 1] = g;
+                this._render2dBuffer[colorOffset + 2] = b;
+                this._render2dBuffer[colorOffset + 3] = a;
+
+                bufferOffset += this._stride;
+                uvOffset += this._stride;
+                colorOffset += this._stride;
+            }
+        }
+    }
 }

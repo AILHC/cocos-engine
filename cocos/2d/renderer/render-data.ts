@@ -456,7 +456,7 @@ export class RenderData extends BaseRenderData {
         this.hashDirty = false;
     }
 
-    public updateRenderData (comp: UIRenderer, frame: SpriteFrame | TextureBase): void {
+    public updateRenderData (comp: UIRenderer, frame: SpriteFrame | TextureBase, isOutline = false, r = 0, g = 0, b = 0, a = 0): void {
         if (this.passDirty) {
             this.material = comp.getRenderMaterial(0)!;
             this.passDirty = false;
@@ -501,8 +501,14 @@ export class RenderData extends BaseRenderData {
                     assert(this._renderDrawInfo.render2dBuffer.length === this._floatStride * this._data.length, 'Vertex count doesn\'t match.');
                 }
             }
-            // sync shared buffer to native
-            this._renderDrawInfo.fillRender2dBuffer(this._data);
+
+            if (isOutline) {
+                // sync shared buffer to native
+                this._renderDrawInfo.fillRender2dBufferWithOutlineColor(this._data, r, g, b, a);
+            } else {
+                // sync shared buffer to native
+                this._renderDrawInfo.fillRender2dBuffer(this._data);
+            }
         }
     }
 

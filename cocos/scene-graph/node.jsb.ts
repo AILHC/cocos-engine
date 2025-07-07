@@ -1053,9 +1053,15 @@ Object.defineProperty(nodeProto, 'activeInHierarchy', {
     configurable: true,
     enumerable: true,
     get(): Readonly<Boolean> {
+        if (!this._sharedUint8Arr) {
+            return false;
+        }
         return this._sharedUint8Arr[0] != 0; // Uint8, 0: activeInHierarchy
     },
     set(v) {
+        if (!this._sharedUint8Arr) {
+            return;
+        }
         this._sharedUint8Arr[0] = (v ? 1 : 0); // Uint8, 0: activeInHierarchy
     },
 });
@@ -1064,9 +1070,15 @@ Object.defineProperty(nodeProto, '__CULLED__', {
     configurable: true,
     enumerable: true,
     get(): Readonly<Boolean> {
+        if (!this._sharedUint8Arr) {
+            return false;
+        }
         return this._sharedUint8Arr[4] != 0; // Uint8, 4: __CULLED__
     },
     set(v) {
+        if (!this._sharedUint8Arr) {
+            return;
+        }
         this._sharedUint8Arr[4] = (v ? 1 : 0); // Uint8, 4: __CULLED__
     },
 });
@@ -1075,9 +1087,15 @@ Object.defineProperty(nodeProto, '__CULLED_SCREEN__', {
     configurable: true,
     enumerable: true,
     get(): Readonly<Boolean> {
+        if (!this._sharedUint8Arr) {
+            return false;
+        }
         return this._sharedUint8Arr[5] != 0; // Uint8, 5: __CULLED_SCREEN__
     },
     set(v) {
+        if (!this._sharedUint8Arr) {
+            return;
+        }
         this._sharedUint8Arr[5] = (v ? 1 : 0); // Uint8, 5: __CULLED_SCREEN__
     },
 });
@@ -1086,9 +1104,15 @@ Object.defineProperty(nodeProto, '_activeInHierarchy', {
     configurable: true,
     enumerable: true,
     get(): Readonly<Boolean> {
+        if (!this._sharedUint8Arr) {
+            return false;
+        }
         return this._sharedUint8Arr[0] != 0; // Uint8, 0: activeInHierarchy
     },
     set(v) {
+        if (!this._sharedUint8Arr) {
+            return;
+        }
         this._sharedUint8Arr[0] = (v ? 1 : 0); // Uint8, 0: activeInHierarchy
     },
 });

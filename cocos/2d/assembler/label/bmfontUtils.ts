@@ -166,10 +166,15 @@ export class BmfontUtils {
         }
 
         if (TextProcessing.instance.noCharSpace && comp?.cacheMode == CacheMode.CHAR) {
-            comp.onUpdateRenderFailed()
+            comp.onUpdateRenderFailed();
         } else if (comp.spriteFrame) {
             const renderData = comp.renderData;
-            renderData.updateRenderData(comp, comp.spriteFrame);
+            if (comp.usingBmfOutline && JSB) {
+                const outlineColor = comp.bmfOutlineColor;
+                renderData.updateRenderData(comp, comp.spriteFrame, true, outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
+            } else {
+                renderData.updateRenderData(comp, comp.spriteFrame);
+            }
         }
     }
 
@@ -188,6 +193,19 @@ export class BmfontUtils {
         }
     }
 
+    pack3ChannelToFloat (r: number, g: number, b: number): number {
+        const r6 = Math.floor(r * 0.2470588); // 63 / 255
+        const g6 = Math.floor(g * 0.2470588);
+        const b6 = Math.floor(b * 0.2470588);
+        return r6 + g6 * 64 + b6 * 4096;
+    }
+
+    pack2AlphaToFloat (a1: number, a2: number): number {
+        a1 = Math.floor(a1);
+        a2 = Math.floor(a2);
+        return a1 + a2 * 256.0;
+    }
+
     updateColor (label: Label): void {
         if (JSB) {
             const renderData = label.renderData!;
@@ -197,11 +215,26 @@ export class BmfontUtils {
             const vData = renderData.chunk.vb;
             const stride = renderData.floatStride;
             let colorOffset = 5;
+
             const color = label.color;
-            const colorR = color.r / 255;
-            const colorG = color.g / 255;
-            const colorB = color.b / 255;
-            const colorA = color.a / 255;
+            let colorR = 0;
+            let colorG = 0;
+            let colorB = 0;
+            let colorA = 0;
+
+            if (label.usingBmfOutline) {
+                const outlineColor = label.bmfOutlineColor;
+                colorR = -1;
+                colorG = this.pack3ChannelToFloat(color.r, color.g, color.b);
+                colorB = this.pack3ChannelToFloat(outlineColor.r, outlineColor.g, outlineColor.b);
+                colorA = this.pack2AlphaToFloat(color.a, outlineColor.a);
+            } else {
+                colorR = color.r / 255;
+                colorG = color.g / 255;
+                colorB = color.b / 255;
+                colorA = color.a / 255;
+            }
+
             for (let i = 0; i < vertexCount; i++) {
                 vData[colorOffset] = colorR;
                 vData[colorOffset + 1] = colorG;

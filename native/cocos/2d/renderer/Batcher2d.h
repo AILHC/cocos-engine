@@ -34,6 +34,7 @@
 #include "renderer/gfx-base/GFXTexture.h"
 #include "renderer/gfx-base/states/GFXSampler.h"
 #include "scene/DrawBatch2D.h"
+#include <cmath>
 
 namespace cc {
 class Root;
@@ -117,6 +118,21 @@ private:
         }
     }
 
+    // 将三个 float 通道（0~255）打包为一个 float（其实是整数）
+    inline float pack3ChannelToFloat(float r, float g, float b) {
+        int r6 = static_cast<int>(std::floor(r * (63.0f / 255.0f)));
+        int g6 = static_cast<int>(std::floor(g * (63.0f / 255.0f)));
+        int b6 = static_cast<int>(std::floor(b * (63.0f / 255.0f)));
+        return static_cast<float>(r6 + g6 * 64 + b6 * 4096);
+    }
+
+    // 将两个 alpha 通道（0~255）打包为一个 float（整数）
+    inline float pack2AlphaToFloat(float a1, float a2) {
+        int ia1 = static_cast<int>(std::floor(a1));
+        int ia2 = static_cast<int>(std::floor(a2));
+        return static_cast<float>(ia1 + ia2 * 256);
+    }
+
     inline void fillColors(RenderEntity* entity, RenderDrawInfo* drawInfo) { // NOLINT(readability-convert-member-functions-to-static)
         Color temp = entity->getColor();
 
@@ -125,12 +141,21 @@ private:
         float* vbBuffer = drawInfo->getVbBuffer();
 
         uint32_t offset = 0;
+        
         for (int i = 0; i < size; i += stride) {
             offset = i + 5;
-            vbBuffer[offset++] = static_cast<float>(temp.r) / 255.0F;
-            vbBuffer[offset++] = static_cast<float>(temp.g) / 255.0F;
-            vbBuffer[offset++] = static_cast<float>(temp.b) / 255.0F;
-            vbBuffer[offset++] = entity->getOpacity();
+            Render2dLayout* curLayout = drawInfo->getRender2dLayout(i);
+            if (curLayout != nullptr && curLayout->uv.x < 0.F) {
+                vbBuffer[offset++] = -1.0F;
+                vbBuffer[offset++] = pack3ChannelToFloat(static_cast<float>(temp.r), static_cast<float>(temp.g), static_cast<float>(temp.b));
+                vbBuffer[offset++] = pack3ChannelToFloat(curLayout->color.x, curLayout->color.y, curLayout->color.z);
+                vbBuffer[offset++] = pack2AlphaToFloat(entity->getOpacity() * 255, curLayout->color.w);
+            } else {
+                vbBuffer[offset++] = static_cast<float>(temp.r) / 255.0F;
+                vbBuffer[offset++] = static_cast<float>(temp.g) / 255.0F;
+                vbBuffer[offset++] = static_cast<float>(temp.b) / 255.0F;
+                vbBuffer[offset++] = entity->getOpacity();
+            }
         }
     }
 
