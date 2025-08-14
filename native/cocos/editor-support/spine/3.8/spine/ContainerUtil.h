@@ -46,7 +46,7 @@ public:
     /// @return May be NULL.
     template <typename T>
     static T* findWithName(Vector<T*>& items, const String& name) {
-        assert(name.length() > 0);
+        // assert(name.length() > 0);
 
         for (size_t i = 0; i < items.size(); ++i) {
             T* item = items[i];
@@ -61,7 +61,7 @@ public:
     /// @return -1 if the item was not found.
     template <typename T>
     static int findIndexWithName(Vector<T*>& items, const String& name) {
-        assert(name.length() > 0);
+        // assert(name.length() > 0);
 
         for (size_t i = 0, len = items.size(); i < len; ++i) {
             T* item = items[i];
@@ -78,7 +78,7 @@ public:
     /// @return May be NULL.
     template <typename T>
     static T* findWithDataName(Vector<T*>& items, const String& name) {
-        assert(name.length() > 0);
+        // assert(name.length() > 0);
 
         for (size_t i = 0; i < items.size(); ++i) {
             T* item = items[i];
@@ -93,7 +93,7 @@ public:
     /// @return -1 if the item was not found.
     template <typename T>
     static int findIndexWithDataName(Vector<T*>& items, const String& name) {
-        assert(name.length() > 0);
+        // assert(name.length() > 0);
 
         for (size_t i = 0, len = items.size(); i < len; ++i) {
             T* item = items[i];

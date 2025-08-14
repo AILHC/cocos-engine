@@ -71,6 +71,7 @@ public:
     void addDynamicRenderDrawInfo(RenderDrawInfo* drawInfo);
     void setDynamicRenderDrawInfo(RenderDrawInfo* drawInfo, uint32_t index);
     void removeDynamicRenderDrawInfo();
+    void removeDynamicRenderDrawInfo(uint32_t index);
     void clearDynamicRenderDrawInfos();
     void clearStaticRenderDrawInfos();
 

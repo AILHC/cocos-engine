@@ -60,6 +60,13 @@ void RenderEntity::removeDynamicRenderDrawInfo() {
     _dynamicDrawInfos.pop_back(); // warning: memory leaking & crash
 }
 
+void RenderEntity::removeDynamicRenderDrawInfo(uint32_t index) {
+    CC_ASSERT_NE(_renderEntityType, RenderEntityType::STATIC);
+    if (index < _dynamicDrawInfos.size()) {
+        _dynamicDrawInfos.erase(_dynamicDrawInfos.begin() + index);
+    }
+}
+
 void RenderEntity::clearDynamicRenderDrawInfos() {
     CC_ASSERT_NE(_renderEntityType, RenderEntityType::STATIC);
     _dynamicDrawInfos.clear();

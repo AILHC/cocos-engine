@@ -52,6 +52,7 @@ using namespace spine;
 %ignore spine::Polygon::Polygon;
 %ignore spine::Polygon::_vertices;
 
+%ignore cc::SlotCacheInfo;
 %ignore cc::SkeletonRenderer::create;
 %ignore cc::SkeletonRenderer::initWithJsonFile;
 %ignore cc::SkeletonRenderer::initWithBinaryFile;
@@ -64,6 +65,9 @@ using namespace spine;
 %ignore cc::SkeletonAnimation::createWithData;
 %ignore cc::SkeletonAnimation::onTrackEntryEvent;
 %ignore cc::SkeletonAnimation::onAnimationStateEvent;
+%ignore cc::SkeletonAnimation::cacheAnimationEvent;
+%ignore cc::SkeletonAnimation::cacheTrackEvent;
+%ignore cc::SkeletonAnimation::dispatchEvents;
 %ignore spine::TrackEntry::setListener;
 %ignore spine::AnimationState::setListener;
 %ignore spine::Attachment::getRTTI;
@@ -111,6 +115,7 @@ using namespace spine;
 %ignore cc::SkeletonDataMgr::setSkeletonData;
 %ignore cc::SkeletonDataMgr::retainByUUID;
 %ignore cc::SkeletonDataMgr::releaseByUUID;
+%ignore cc::SkeletonDataMgr::getSkeletonDataInfo;
 %ignore cc::SkeletonCacheAnimation::render;
 %ignore cc::SkeletonCacheAnimation::requestDrawInfo;
 %ignore cc::SkeletonCacheAnimation::requestMaterial;
@@ -624,6 +629,7 @@ using namespace spine;
 %include "editor-support/spine-creator-support/SkeletonDataMgr.h"
 %include "editor-support/spine-creator-support/SkeletonCacheAnimation.h"
 %include "editor-support/spine-creator-support/SkeletonCacheMgr.h"
+%include "editor-support/spine-creator-support/Vector2.h"
 
 %extend spine::IkConstraint {
     void apply1(Bone *bone, float targetX, float targetY, bool compress, bool stretch, bool uniform, float alpha) {

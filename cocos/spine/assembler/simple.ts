@@ -128,7 +128,8 @@ export const simple = new Simple();
 
 function updateComponentRenderData (comp: Skeleton): void {
     comp.drawList.reset();
-    if (comp.color.a === 0) return;
+    const rd = comp.renderData;
+    if (comp.color.a === 0 || !rd) return;
     comp._updateColor();
     _premultipliedAlpha = comp.premultipliedAlpha;
     _useTint = comp.useTint || comp.isAnimationCached();
@@ -137,7 +138,6 @@ function updateComponentRenderData (comp: Skeleton): void {
     } else {
         realTimeTraverse(comp);
     }
-    const rd = comp.renderData!;
     const accessor = _useTint ? _tintAccessor : _accessor;
     comp.syncAttachedNode();
     if (rd.vertexCount > 0 || rd.indexCount > 0) accessor.getMeshBuffer(rd.chunk.bufferId).setDirty();
@@ -148,9 +148,9 @@ function realTimeTraverse (comp: Skeleton): void {
     const model = comp.updateRenderData();
     const vc = model.vCount as number;
     const ic = model.iCount as number;
-    if (vc < 1 || ic < 1) return;
+    const rd = comp.renderData;
+    if (!rd || vc < 1 || ic < 1) return;
 
-    const rd = comp.renderData!;
     if (rd.vertexCount !== vc || rd.indexCount !== ic) {
         rd.resize(vc, ic);
         rd.indices = new Uint16Array(ic);
@@ -270,8 +270,8 @@ function cacheTraverse (comp: Skeleton): void {
 
     const vc = model.vCount as number;
     const ic = model.iCount as number;
-    if (vc < 1 || ic < 1) return;
-    const rd = comp.renderData!;
+    const rd = comp.renderData;
+    if (!rd || vc < 1 || ic < 1) return;
     if (rd.vertexCount !== vc || rd.indexCount !== ic) {
         rd.resize(vc, ic);
         rd.indices = new Uint16Array(ic);

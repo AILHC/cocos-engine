@@ -47,6 +47,14 @@ void UIModelProxy::activeSubModels() {
     auto* entity = static_cast<RenderEntity*>(_node->getUserData());
     auto drawInfoSize = entity->getDynamicRenderDrawInfos().size();
     auto subModelSize = _model->getSubModels().size();
+
+    for (int i = drawInfoSize - 1; i >= (int)subModelSize; i--) {
+        RenderDrawInfo* drawInfo = entity->getDynamicRenderDrawInfo(static_cast<uint32_t>(i));
+        if (drawInfo == nullptr || drawInfo->getMaterial() == nullptr || !drawInfo->getMaterial()->isValid()) {
+            entity->removeDynamicRenderDrawInfo(i);
+        }
+    }
+
     if (drawInfoSize > subModelSize) {
         for (size_t i = subModelSize; i < drawInfoSize; i++) {
             if (_model->getSubModels().size() <= i) {

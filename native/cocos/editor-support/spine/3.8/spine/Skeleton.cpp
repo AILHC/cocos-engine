@@ -316,7 +316,11 @@ int Skeleton::findSlotIndex(const String &slotName) {
 void Skeleton::setSkin(const String &skinName) {
     Skin *foundSkin = _data->findSkin(skinName);
 
-    assert(foundSkin != NULL);
+    // assert(foundSkin != NULL);
+    if (foundSkin == NULL) {
+        // LOGE("Skeleton: skin not found: %s", skinName.buffer());
+        return;
+    }
 
     setSkin(foundSkin);
 }
