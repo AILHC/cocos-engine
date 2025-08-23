@@ -63,7 +63,7 @@
         middleware.reset();
 
         //const batcher2D = director.root.batcher2D;
-        if (globalThis.dragonBones) {
+        if (globalThis.dragonBones && cc.internal.ArmatureSystem) {
             const armaSystem = cc.internal.ArmatureSystem.getInstance();
             armaSystem.prepareRenderData();
         }
@@ -102,17 +102,17 @@
                 const hasSetFunc = typeof setFunc === 'function';
                 if (hasSetFunc) {
                     Object.defineProperty(classProto, propName, {
-                        get () {
+                        get() {
                             return this[getName]();
                         },
-                        set (val) {
+                        set(val) {
                             this[setName](val);
                         },
                         configurable: true,
                     });
                 } else {
                     Object.defineProperty(classProto, propName, {
-                        get () {
+                        get() {
                             return this[getName]();
                         },
                         configurable: true,
