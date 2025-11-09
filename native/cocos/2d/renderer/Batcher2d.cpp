@@ -97,7 +97,7 @@ void Batcher2d::fillBuffersAndMergeBatches() {
     size_t index = 0;
     for (auto* rootNode : _rootNodeArr) {
         // _batches will add by generateBatch
-        walk(rootNode, 1, false);
+        walk(rootNode, 1, false, NodeWalkSource::NONE);
         generateBatch(_currEntity, _currDrawInfo);
 
         auto* scene = rootNode->getScene()->getRenderScene();
@@ -109,13 +109,25 @@ void Batcher2d::fillBuffersAndMergeBatches() {
     }
 }
 
-void Batcher2d::walk(Node* node, float parentOpacity, bool parentOpacityDirty) { // NOLINT(misc-no-recursion)
+void Batcher2d::walk(Node* node, float parentOpacity, bool parentOpacityDirty, NodeWalkSource source) { // NOLINT(misc-no-recursion)
     if (!node->isActiveInHierarchy()) {
         return;
     }
 
     if (node->isCulled() || node->isCulledScreen()) {
         return;
+    }
+
+    CustomRenderType customRenderType = static_cast<CustomRenderType>(node->getCustomRenderType());
+
+    if (customRenderType == CustomRenderType::DELAY) {
+        if (source == NodeWalkSource::NONE) {
+            node->parentOpacity = parentOpacity;
+            node->parentOpacityDirty = parentOpacityDirty;
+            return;
+        } else if (source == NodeWalkSource::DELAY_CONTAINER) {
+            source = NodeWalkSource::NONE;
+        }
     }
 
     bool breakWalk = false;
@@ -136,7 +148,7 @@ void Batcher2d::walk(Node* node, float parentOpacity, bool parentOpacityDirty) {
             uint32_t size = entity->getRenderDrawInfosSize();
             for (uint32_t i = 0; i < size; i++) {
                 auto* drawInfo = entity->getRenderDrawInfoAt(i);
-                handleDrawInfo(entity, drawInfo, node);
+                handleDrawInfo(entity, drawInfo, node, source);
             }
             entity->setVBColorDirty(false);
         }
@@ -146,11 +158,21 @@ void Batcher2d::walk(Node* node, float parentOpacity, bool parentOpacityDirty) {
     }
 
     if (!breakWalk) {
-        const auto& children = node->getChildren();
-        float thisOpacity = entity ? entity->getOpacity() : parentOpacity;
-        for (const auto& child : children) {
-            // we should find parent opacity recursively upwards if it doesn't have an entity.
-            walk(child, thisOpacity, opacityDirty || parentOpacityDirty);
+        if (customRenderType == CustomRenderType::DELAY_CONTAINER) {
+            const auto& renderChildren = node->getDelayRenderChildren();
+            for (const auto& rchild : renderChildren) {
+                float rchildThisOpacity = entity ? entity->getOpacity() : rchild->parentOpacity;
+                bool rchildParentOpacityDirty = rchild->parentOpacityDirty;
+                walk(rchild, rchildThisOpacity, opacityDirty || rchildParentOpacityDirty, NodeWalkSource::DELAY_CONTAINER);
+            }
+        } else {
+            const auto& children = node->getChildren();
+            float thisOpacity = entity ? entity->getOpacity() : parentOpacity;
+
+            for (const auto& child : children) {
+                // we should find parent opacity recursively upwards if it doesn't have an entity.
+                walk(child, thisOpacity, opacityDirty || parentOpacityDirty, source);
+            }
         }
     }
 
@@ -301,13 +323,13 @@ CC_FORCE_INLINE void Batcher2d::handleMiddlewareDraw(RenderEntity* entity, Rende
     }
 }
 
-CC_FORCE_INLINE void Batcher2d::handleSubNode(RenderEntity* entity, RenderDrawInfo* drawInfo) { // NOLINT
+CC_FORCE_INLINE void Batcher2d::handleSubNode(RenderEntity* entity, RenderDrawInfo* drawInfo, NodeWalkSource source) { // NOLINT
     if (drawInfo->getSubNode()) {
-        walk(drawInfo->getSubNode(), entity->getOpacity(), false);
+        walk(drawInfo->getSubNode(), entity->getOpacity(), false, source);
     }
 }
 
-CC_FORCE_INLINE void Batcher2d::handleDrawInfo(RenderEntity* entity, RenderDrawInfo* drawInfo, Node* node) { // NOLINT(misc-no-recursion)
+CC_FORCE_INLINE void Batcher2d::handleDrawInfo(RenderEntity* entity, RenderDrawInfo* drawInfo, Node* node, NodeWalkSource source) { // NOLINT(misc-no-recursion)
     CC_ASSERT(entity);
     CC_ASSERT(drawInfo);
     RenderDrawInfoType drawInfoType = drawInfo->getEnumDrawInfoType();
@@ -323,7 +345,7 @@ CC_FORCE_INLINE void Batcher2d::handleDrawInfo(RenderEntity* entity, RenderDrawI
             handleMiddlewareDraw(entity, drawInfo);
             break;
         case RenderDrawInfoType::SUB_NODE:
-            handleSubNode(entity, drawInfo);
+            handleSubNode(entity, drawInfo, source);
             break;
         default:
             break;

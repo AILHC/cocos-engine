@@ -1059,6 +1059,7 @@ void Node::_setChildren(ccstd::vector<IntrusivePtr<Node>> &&children) {
 void Node::destruct() {
     CCObject::destruct();
     _children.clear();
+    _delayRenderChildren.clear();
     _scene = nullptr;
     _userData = nullptr;
 }

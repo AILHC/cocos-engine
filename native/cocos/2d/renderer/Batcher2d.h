@@ -64,13 +64,13 @@ public:
     void updateDescriptorSet();
 
     void fillBuffersAndMergeBatches();
-    void walk(Node* node, float parentOpacity, bool parentOpacityDirty);
+    void walk(Node* node, float parentOpacity, bool parentOpacityDirty, NodeWalkSource source);
     void handlePostRender(RenderEntity* entity);
-    void handleDrawInfo(RenderEntity* entity, RenderDrawInfo* drawInfo, Node* node);
+    void handleDrawInfo(RenderEntity* entity, RenderDrawInfo* drawInfo, Node* node, NodeWalkSource source);
     void handleComponentDraw(RenderEntity* entity, RenderDrawInfo* drawInfo, Node* node);
     void handleModelDraw(RenderEntity* entity, RenderDrawInfo* drawInfo);
     void handleMiddlewareDraw(RenderEntity* entity, RenderDrawInfo* drawInfo);
-    void handleSubNode(RenderEntity* entity, RenderDrawInfo* drawInfo);
+    void handleSubNode(RenderEntity* entity, RenderDrawInfo* drawInfo, NodeWalkSource source);
     void generateBatch(RenderEntity* entity, RenderDrawInfo* drawInfo);
     void generateBatchForMiddleware(RenderEntity* entity, RenderDrawInfo* drawInfo);
     void resetRenderStates();

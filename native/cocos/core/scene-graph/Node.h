@@ -47,6 +47,21 @@ enum class SkewType : uint8_t {
     ROTATIONAL = 2,
 };
 
+enum class CustomRenderType: uint8_t {
+    NONE = 0,
+    COMMON = 1,
+    SIMPLE = 2,
+    DELAY = 3,
+    DELAY_CONTAINER = 4,
+};
+
+enum class NodeWalkSource: uint8_t {
+    NONE = 0,
+    GROUP = 1,
+    SIMPLE_GROUP = 2,
+    DELAY_CONTAINER = 3,
+};
+
 class Scene;
 /**
  * Event types emitted by Node
@@ -186,6 +201,19 @@ public:
             node->setParent(nullptr);
         }
     }
+
+    inline void addDelayRenderNode(Node *node) {
+        if (!node) return;
+        _delayRenderChildren.emplace_back(node);
+    }
+
+    inline void removeDelayRenderNode(Node *node) {
+        auto it = std::find(_delayRenderChildren.begin(), _delayRenderChildren.end(), node);
+        if (it != _delayRenderChildren.end()) {
+            _delayRenderChildren.erase(it);
+        }
+    }
+
     inline void removeFromParent() {
         if (_parent) {
             _parent->removeChild(this);
@@ -224,7 +252,12 @@ public:
     inline bool isCulledScreen() const { return __CULLED_SCREEN__ != 0; }
     inline void setIsCulledScreen(bool v) { __CULLED_SCREEN__ = (v ? 1 : 0); }
 
+    inline uint8_t getCustomRenderType() const { return _customRenderType; }
+
     inline const ccstd::vector<IntrusivePtr<Node>> &getChildren() const { return _children; }
+    inline const ccstd::vector<IntrusivePtr<Node>> &getDelayRenderChildren() const { return _delayRenderChildren; }
+    inline void removeAllDelayRenderChildren() { _delayRenderChildren.clear(); }
+
     inline Node *getParent() const { return _parent; }
     // inline NodeEventProcessor *getEventProcessor() const { return _eventProcessor; }
 
@@ -616,6 +649,9 @@ public:
     Node *_parent{nullptr};
     MobilityMode _mobility = MobilityMode::Static;
 
+    float parentOpacity{0.0F}; 
+    bool parentOpacityDirty{false};
+
 private:
     static index_t getIdxOfChild(const ccstd::vector<IntrusivePtr<Node>> &, Node *);
 
@@ -672,6 +708,7 @@ private:
     IntrusivePtr<UserData> _userData;
 
     ccstd::vector<IntrusivePtr<Node>> _children;
+    ccstd::vector<IntrusivePtr<Node>> _delayRenderChildren;
     bindings::NativeMemorySharedToScriptActor _sharedMemoryActor;
     // local transform
     Vec3 _localPosition{Vec3::ZERO};
@@ -698,7 +735,7 @@ private:
 
     uint8_t __CULLED__{0};                                              // Uint8: 4
     uint8_t __CULLED_SCREEN__{0};                                       // Uint8: 5
-    uint8_t _padding1{0};                                               // Uint8: 6
+    uint8_t _customRenderType{static_cast<uint8_t>(CustomRenderType::NONE)};    // Uint8: 6
     uint8_t _padding2{0};                                               // Uint8: 7
 
     float _skewX{.0F};                                                  // Float32: 0

@@ -1100,6 +1100,17 @@ Object.defineProperty(nodeProto, '__CULLED_SCREEN__', {
     },
 });
 
+Object.defineProperty(nodeProto, '__CUSTOM_RENDER__', {
+    configurable: true,
+    enumerable: true,
+    get(): Readonly<Boolean> {
+        return this._sharedUint8Arr[6]; // Uint8, 6: _customRenderType
+    },
+    set(v) {
+        this._sharedUint8Arr[6] = v; // Uint8, 6: _customRenderType
+    },
+});
+
 Object.defineProperty(nodeProto, '_activeInHierarchy', {
     configurable: true,
     enumerable: true,
@@ -1574,8 +1585,8 @@ nodeProto._ctor = function (name?: string) {
     this._sharedUint32Arr = new Uint32Array(sharedArrayBuffer, 0, 3);
     // Int32Array with 1 element: siblingIndex
     this._sharedInt32Arr = new Int32Array(sharedArrayBuffer, 12, 1);
-    // Uint8Array with 4 elements: activeInHierarchy, active, static, _hasSkewComp, __CULLED__, __CULLED_SCREEN__
-    this._sharedUint8Arr = new Uint8Array(sharedArrayBuffer, 16, 6);
+    // Uint8Array with 4 elements: activeInHierarchy, active, static, _hasSkewComp, __CULLED__, __CULLED_SCREEN__, _customRenderType
+    this._sharedUint8Arr = new Uint8Array(sharedArrayBuffer, 16, 7);
     // Float32Array with 2 elements: skewX, skewY
     this._sharedFloat32Arr = new Float32Array(sharedArrayBuffer, 24, 2);
 
