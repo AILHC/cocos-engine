@@ -19,6 +19,7 @@
         "source.fixAll": "explicit",
     },
     "files.associations": {
+        "*.bp": "json",
         "*.cmake": "makefile",
         "iterator": "cpp",
         "*.ipp": "cpp",
@@ -31,7 +32,11 @@
         "xstring": "cpp",
         "tuple": "cpp",
         "vector": "cpp",
-        "istream": "c"
+        "istream": "c",
+        "vector2.h": "c",
+        "jsb_conversions.h": "c",
+        "memory": "cpp",
+        "mutex": "cpp"
     },
     "cmake.configureOnOpen": false,
 }

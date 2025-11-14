@@ -75,6 +75,8 @@ public:
     void generateBatchForMiddleware(RenderEntity* entity, RenderDrawInfo* drawInfo);
     void resetRenderStates();
 
+    uint sgrLevel = 0;
+    
 private:
     bool _isInit = false;
 

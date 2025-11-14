@@ -253,6 +253,7 @@ public:
     inline void setIsCulledScreen(bool v) { __CULLED_SCREEN__ = (v ? 1 : 0); }
 
     inline uint8_t getCustomRenderType() const { return _customRenderType; }
+    inline bool isIgnoreSGR() const { return _isIgnoreSGR != 0; }
 
     inline const ccstd::vector<IntrusivePtr<Node>> &getChildren() const { return _children; }
     inline const ccstd::vector<IntrusivePtr<Node>> &getDelayRenderChildren() const { return _delayRenderChildren; }
@@ -736,7 +737,7 @@ private:
     uint8_t __CULLED__{0};                                              // Uint8: 4
     uint8_t __CULLED_SCREEN__{0};                                       // Uint8: 5
     uint8_t _customRenderType{static_cast<uint8_t>(CustomRenderType::NONE)};    // Uint8: 6
-    uint8_t _padding2{0};                                               // Uint8: 7
+    uint8_t _isIgnoreSGR{0};                                            // Uint8: 7
 
     float _skewX{.0F};                                                  // Float32: 0
     float _skewY{.0F};                                                  // Float32: 1

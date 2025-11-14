@@ -30,8 +30,138 @@
 #include "editor-support/MiddlewareManager.h"
 #include "renderer/pipeline/Define.h"
 #include "scene/Pass.h"
+#include "core/memop/CachedArray.h"
 
 namespace cc {
+
+struct Counter {
+    int cnt = 0;
+};
+
+using ArrArrNode = CachedArray<CachedArray<Node*>*>;
+
+static void cacheNodeTree(ArrArrNode& cacheArr, Counter& counter, ArrArrNode& ignoreArr, Node* root) {
+    if (root->isCulled() || root->isCulledScreen()) {
+        return;
+    }
+
+    const int curCnt = counter.cnt;
+    CachedArray<Node*>* list = nullptr;
+    
+    if (root->isIgnoreSGR()) {
+        if (static_cast<uint>(curCnt) < ignoreArr.capacity()) {
+            list = ignoreArr[curCnt];
+            if (list == nullptr) {
+                list = ccnew CachedArray<Node*>(32, true);
+                ignoreArr.rawSet(curCnt, list);
+            }
+            ignoreArr.updateSize(curCnt + 1);
+            list->pushSafe(root);
+        } else {
+            ignoreArr.reserveSafeEx(cacheArr.capacity() * 2, curCnt + 1);
+            auto* newList = ccnew CachedArray<Node*>(32, true);
+            ignoreArr.set(curCnt, newList);
+            newList->pushSafe(root);
+        }
+        return;
+    }
+
+    if (static_cast<uint>(curCnt) < cacheArr.capacity()) {
+        list = cacheArr[curCnt];
+        if (list == nullptr) {
+            list = ccnew CachedArray<Node*>(32, true);
+            cacheArr.rawSet(curCnt, list);
+        }
+        cacheArr.updateSize(curCnt + 1);
+    } else {
+        auto* newList = ccnew CachedArray<Node*>(32, true);
+        cacheArr.set(curCnt, newList);
+        list = newList;
+    }
+
+    list->pushSafe(root);
+    counter.cnt++;
+
+    const auto& children = root->getChildren();
+    for (const auto& child : children) {
+        cacheNodeTree(cacheArr, counter, ignoreArr, child);
+    }
+}
+
+static void _simpleCustomRender(
+    Batcher2d* batcher,
+    const ccstd::vector<IntrusivePtr<Node>>& children,
+    float parentOpacity, bool parentOpacityDirty
+) {
+    if (children.empty()) return;
+
+    static ArrArrNode CACHE_ARR_L1(32, true);
+    static ArrArrNode IGNORE_ARR_L1(32, true);
+    static Counter ITER_CNTER_L1;
+    static ArrArrNode CACHE_ARR_L2(32, true);
+    static ArrArrNode IGNORE_ARR_L2(32, true);
+    static Counter ITER_CNTER_L2;
+
+    bool isLevel2 = (batcher->sgrLevel == 2);
+
+    ArrArrNode& CACHE_ARR = isLevel2 ? CACHE_ARR_L2 : CACHE_ARR_L1;
+    ArrArrNode& IGNORE_ARR = isLevel2 ? IGNORE_ARR_L2 : IGNORE_ARR_L1;
+    Counter& ITER_CNTER = isLevel2 ? ITER_CNTER_L2 : ITER_CNTER_L1;
+
+    CACHE_ARR.clear();
+    IGNORE_ARR.clear();
+
+    for (const auto& child : children) {
+        if (!child->isCulled() && !child->isCulledScreen()) {
+            ITER_CNTER.cnt = 0;
+            cacheNodeTree(CACHE_ARR, ITER_CNTER, IGNORE_ARR, child);
+        }
+    }
+
+    const uint len = CACHE_ARR.size();
+    const uint ignoreLen = IGNORE_ARR.size();
+
+    for (uint i = 0; i < len; ++i) {
+        if (i < ignoreLen) {
+            auto* ignoreArr = IGNORE_ARR[i];
+            if (ignoreArr) {
+                const uint ignoreInnerLen = ignoreArr->size();
+                if (ignoreInnerLen > 0) {
+                    for(uint k = 0; k < ignoreInnerLen; ++k) {
+                        batcher->walk((*ignoreArr)[k], parentOpacity, parentOpacityDirty, NodeWalkSource::NONE);
+                        ignoreArr->rawSet(k, nullptr);
+                    }
+                    ignoreArr->clear();
+                }
+            }
+        }
+
+        auto* arr = CACHE_ARR[i];
+        if (!arr) continue;
+
+        const uint innerLen = arr->size();
+
+        for (uint j = 0; j < innerLen; ++j) {
+            batcher->walk((*arr)[j], parentOpacity, parentOpacityDirty, NodeWalkSource::SIMPLE_GROUP);
+            arr->rawSet(j, nullptr);
+        }
+        arr->clear();
+    }
+
+    for(uint x = len - 1; x < ignoreLen; ++x) {
+        auto* ignoreArr = IGNORE_ARR[x];
+        if (ignoreArr) {
+            const uint ignoreInnerLen2 = ignoreArr->size();
+            if (ignoreInnerLen2 > 0) {
+                for(uint y = 0; y < ignoreInnerLen2; ++y) {
+                    batcher->walk((*ignoreArr)[y], parentOpacity, parentOpacityDirty, NodeWalkSource::NONE);
+                    ignoreArr->rawSet(y, nullptr);
+                }
+                ignoreArr->clear();
+            } 
+        }
+    }
+}
 
 Batcher2d::Batcher2d() : Batcher2d(nullptr) {
 }
@@ -165,13 +295,33 @@ void Batcher2d::walk(Node* node, float parentOpacity, bool parentOpacityDirty, N
                 bool rchildParentOpacityDirty = rchild->parentOpacityDirty;
                 walk(rchild, rchildThisOpacity, opacityDirty || rchildParentOpacityDirty, NodeWalkSource::DELAY_CONTAINER);
             }
+        } else if (customRenderType == CustomRenderType::SIMPLE) {
+            if (sgrLevel >= 2) {
+                if (source != NodeWalkSource::SIMPLE_GROUP) {
+                    const auto& children3 = node->getChildren();
+                    float thisOpacity3 = entity ? entity->getOpacity() : parentOpacity;
+        
+                    for (const auto& child3 : children3) {
+                        // we should find parent opacity recursively upwards if it doesn't have an entity.
+                        walk(child3, thisOpacity3, opacityDirty || parentOpacityDirty, source);
+                    }
+                }
+            } else {
+                sgrLevel++;
+                float thisOpacity2 = entity ? entity->getOpacity() : parentOpacity;
+                const auto& children2 = node->getChildren();
+                _simpleCustomRender(this, children2, thisOpacity2, opacityDirty || parentOpacityDirty);
+                sgrLevel--;
+            }
         } else {
-            const auto& children = node->getChildren();
-            float thisOpacity = entity ? entity->getOpacity() : parentOpacity;
-
-            for (const auto& child : children) {
-                // we should find parent opacity recursively upwards if it doesn't have an entity.
-                walk(child, thisOpacity, opacityDirty || parentOpacityDirty, source);
+            if (source != NodeWalkSource::SIMPLE_GROUP) {
+                const auto& children = node->getChildren();
+                float thisOpacity = entity ? entity->getOpacity() : parentOpacity;
+    
+                for (const auto& child : children) {
+                    // we should find parent opacity recursively upwards if it doesn't have an entity.
+                    walk(child, thisOpacity, opacityDirty || parentOpacityDirty, source);
+                }
             }
         }
     }

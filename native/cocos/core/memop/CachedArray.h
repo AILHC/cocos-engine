@@ -41,6 +41,18 @@ public:
         _array = ccnew T[_capacity];
     }
 
+    explicit CachedArray(uint size, bool initZero) {
+        _size = 0;
+        _capacity = std::max(size, 1U);
+        _array = ccnew T[_capacity];
+
+        if (initZero) {
+            for (uint i = 0; i < _capacity; ++i) {
+                _array[i] = T();
+            }
+        }
+    }
+
     // The rule of five applies here
     ~CachedArray() {
         CC_SAFE_DELETE_ARRAY(_array);
@@ -155,6 +167,59 @@ public:
             }
         }
         return UINT_MAX;
+    }
+
+    inline void rawSet(uint idx, T item) {
+        _array[idx] = item;
+    }
+
+    inline void setSize(uint size) {
+        _size = size;
+    }
+
+    inline void set(uint idx, T item) {
+        if ((idx + 1) >= _capacity) {
+            reserveSafe(_capacity * 2);
+        }
+        _array[idx] = item;
+        _size = std::max(_size, idx + 1);
+    }
+
+    inline uint capacity() const { return _capacity; }
+
+    inline void reserveSafeEx(uint size1, uint size2) {
+        uint newSize = std::max(size1, size2);
+        reserveSafe(newSize);
+    }
+
+    void reserveSafe(uint newCapacity) {
+       if (newCapacity <= _capacity) return;
+
+        T* tempOld = _array;
+        T* newArray = ccnew T[newCapacity];
+
+        memcpy(newArray, tempOld, _capacity * sizeof(T));
+
+        const uint oldCap = _capacity;
+        const uint remain = newCapacity - oldCap;
+        if (remain > 0) {
+            memset(newArray + oldCap, 0, remain * sizeof(T));
+        }
+
+        delete[] tempOld;
+        _array = newArray;
+        _capacity = newCapacity;
+    }
+
+    void updateSize(uint size) {
+        _size = std::max(_size, size);
+    }
+
+    void pushSafe(T item) {
+        if (_size >= _capacity) {
+            reserveSafe(_capacity * 2);
+        }
+        _array[_size++] = item;
     }
 
 private:
