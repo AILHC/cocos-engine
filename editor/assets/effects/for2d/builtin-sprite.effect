@@ -34,6 +34,22 @@ CCProgram sprite-vs %{
 
   out vec4 color;
   out vec2 uv0;
+  out vec4 outlineColor;
+
+  vec4 unpackColor(float f, float a) {
+    float r6 = mod(f, 64.0);
+    f = floor(f * 0.015625); // 1/64 = 0.015625
+    float g6 = mod(f, 64.0);
+    f = floor(f * 0.015625);
+    float b6 = mod(f, 64.0);
+    return vec4(r6 * 0.015873, g6 * 0.015873, b6 * 0.015873, a) ; // 1/63
+  }
+
+  vec2 unpack2AlphaFromFloat(float f) {
+    float a1 = mod(f, 256.0);
+    float a2 = floor(f * 0.00390625); //  1/256.0
+    return vec2(a1, a2) * 0.0039215; // 1/255.0
+  }
 
   vec4 vert () {
     vec4 pos = vec4(a_position, 1);
@@ -54,7 +70,31 @@ CCProgram sprite-vs %{
     #if SAMPLE_FROM_RT
       CC_HANDLE_RT_SAMPLE_FLIP(uv0);
     #endif
-    color = a_color;
+    // if (a_color.r < 0.0) {
+    //   vec2 alphas = unpack2AlphaFromFloat(a_color.a);
+    //   color = unpackColor(a_color.g, alphas.x);
+    //   outlineColor = unpackColor(a_color.b, alphas.y);
+    // } else {
+    //   color = a_color;
+    //   outlineColor = vec4(-1, 0, 0, 0);
+    // }
+
+    float isNormalCase = step(0.0,a_color.r); // a_color.r >= 0时为1
+    float isSpecialCase = 1.0 - isNormalCase;  // a_color.r < 0时为1
+
+    vec2 alphas = unpack2AlphaFromFloat(a_color.a) * isSpecialCase;
+
+    color = mix(
+        unpackColor(a_color.g, alphas.x), 
+        a_color, 
+        isNormalCase
+    );
+
+    outlineColor = mix(
+        unpackColor(a_color.b, alphas.y),
+        vec4(-1, 0, 0, 0),
+        isNormalCase
+    );
 
     return pos;
   }
@@ -66,6 +106,7 @@ CCProgram sprite-fs %{
   #include <builtin/internal/alpha-test>
 
   in vec4 color;
+  in vec4 outlineColor;
 
   #if USE_TEXTURE
     in vec2 uv0;
@@ -78,13 +119,29 @@ CCProgram sprite-fs %{
 
     #if USE_TEXTURE
       o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
-      #if IS_GRAY
-        float gray  = 0.2126 * o.r + 0.7152 * o.g + 0.0722 * o.b;
-        o.r = o.g = o.b = gray;
-      #endif
     #endif
 
-    o *= color;
+    float alphaLerp = o.r;
+    vec4 lerpColor = mix(outlineColor, color, alphaLerp);
+
+    float a_factor = step(0.1, outlineColor.a);
+
+    vec4 label_color = o;
+
+    label_color.rgb = mix(vec3(1), lerpColor.rgb, a_factor);
+    label_color.a = mix(o.a * alphaLerp, o.a * lerpColor.a, a_factor);
+    label_color.a *= color.a;
+    label_color *= mix(color, vec4(1), a_factor); 
+
+    float r_factor = step(0.0, outlineColor.r);
+    o = mix(o * color, label_color, r_factor);
+
+    #if IS_GRAY
+      float gray = 0.2126 * o.r + 0.7152 * o.g + 0.0722 * o.b;
+      gray *= o.a;
+      o.r = o.g = o.b = gray;
+    #endif
+
     ALPHA_TEST(o);
     return o;
   }
