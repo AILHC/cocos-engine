@@ -10,6 +10,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 project(${APP_NAME}_wasm)
 
+# 添加 CMake 模块路径
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
+
 set(BUILD_WASM 1)
 set(ENABLE_JSON_PARSER 1)
 set(ENABLE_BINARY_PARSER 1)
@@ -21,16 +24,36 @@ set(CMAKE_BUILD_TYPE "MinSizeRel")
 # set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 # set(CMAKE_BUILD_TYPE "Debug")
 
+# 三种构建类型配置
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # Debug 模式：无优化 + 完整调试信息 + source map + 符号表 + DWARF
     set(ENABLE_CLOSURE_COMPILER 0)
-    set(SPINE_EXTRA_FLAGS "")
-else()
+    set(SPINE_EXTRA_FLAGS "-O0 -g -gsource-map --emit-symbol-map -gseparate-dwarf")
+    message(">>> 构建模式: Debug（无优化 + 完整调试信息 + DWARF）")
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    # RelWithDebInfo 模式：-O2 + 完整调试信息 + source map + 符号表 + DWARF
+    set(ENABLE_CLOSURE_COMPILER 0)
+    set(SPINE_EXTRA_FLAGS "-O2 -g -gsource-map --emit-symbol-map -gseparate-dwarf")
+    message(">>> 构建模式: RelWithDebInfo（O2 优化 + 调试信息 + DWARF）")
+elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+    # MinSizeRel 模式：-Oz + --emit-symbol-map（无 source map）
     set(ENABLE_CLOSURE_COMPILER 1)
-    set(SPINE_EXTRA_FLAGS "-Oz")
+    set(SPINE_EXTRA_FLAGS "-Oz --emit-symbol-map")
+    message(">>> 构建模式: MinSizeRel（体积优化 + 符号表，无 source map）")
+else()
+    # 默认使用 MinSizeRel 配置
+    set(ENABLE_CLOSURE_COMPILER 1)
+    set(SPINE_EXTRA_FLAGS "-Oz --emit-symbol-map")
+    message(">>> 构建模式: 默认（体积优化 + 符号表，无 source map）")
 endif()
 
-if(BUILD_WASM EQUAL 1 AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(EVAL_CTOR_FLAG "-s EVAL_CTORS=1")
+if(BUILD_WASM EQUAL 1)
+    # WebAssembly 模式下，除 Debug 外都启用 EVAL_CTORS 优化
+    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(EVAL_CTOR_FLAG "-s EVAL_CTORS=1")
+    else()
+        set(EVAL_CTOR_FLAG "")
+    endif()
 else()
     set(EVAL_CTOR_FLAG "") # asmjs doesn't support EVAL_CTORS
 endif()
@@ -83,9 +106,34 @@ else()
     message(FATAL_ERROR "Unsupported SPINE_VERSION: ${SPINE_VERSION}")
 endif()
 
+# 如果启用了内存分析，部署自定义版本
+if(ENABLE_MEMORY_PROFILING)
+    include(DeployMemoryProfiler)
+    deploy_memory_profiler("${CMAKE_CURRENT_LIST_DIR}/memoryprofiler_custom.js")
+endif()
+
 add_executable(${APP_NAME} ${SPINE_CORE_SRC} ${COCOS_ADAPTER_SRC})
 
+# 如果启用了内存分析，编译后恢复原始版本
+if(ENABLE_MEMORY_PROFILING)
+    add_custom_command(TARGET ${APP_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND}
+            -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
+            -DRESTORE_PROFILER=TRUE
+            -P "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/DeployMemoryProfiler.cmake"
+        COMMENT "恢复原始 memoryprofiler.js"
+    )
+endif()
+
 # -s EMBIND_AOT=0 -s MALLOC=emmalloc
+# set(EMS_LINK_FLAGS "${SPINE_EXTRA_FLAGS} ${EVAL_CTOR_FLAG} -s VERBOSE=${VERBOSE_LOG} -s WASM=${BUILD_WASM} -s INITIAL_MEMORY=33554432 -s ALLOW_MEMORY_GROWTH=1 -s DYNAMIC_EXECUTION=0 -s ERROR_ON_UNDEFINED_SYMBOLS=0 ${ENABLE_MEMORY_PROFILING} \
+#         -flto --no-entry --bind -s USE_ES6_IMPORT_META=0 -s EXPORT_ES6=1 -s MODULARIZE=1 -s EXPORT_NAME='spineWasm' \
+#         -s ENVIRONMENT=web -s FILESYSTEM=0 -s NO_EXIT_RUNTIME=1 -s LLD_REPORT_UNDEFINED \
+#         -s MIN_SAFARI_VERSION=110000 \
+#         -s EXPORTED_FUNCTIONS=['_spineListenerCallBackFromJS','_spineTrackListenerCallback'] \
+#         --js-library ../library_spine.js \
+#         --closure=${ENABLE_CLOSURE_COMPILER} \
+#         --closure-args=--externs=../library_spine_externs.js")
 set(EMS_LINK_FLAGS "${SPINE_EXTRA_FLAGS} ${EVAL_CTOR_FLAG} -s VERBOSE=${VERBOSE_LOG} -s WASM=${BUILD_WASM} -s INITIAL_MEMORY=33554432 -s ALLOW_MEMORY_GROWTH=1 -s DYNAMIC_EXECUTION=0 -s ERROR_ON_UNDEFINED_SYMBOLS=0 ${ENABLE_MEMORY_PROFILING} \
         -flto --no-entry --bind -s USE_ES6_IMPORT_META=0 -s EXPORT_ES6=1 -s MODULARIZE=1 -s EXPORT_NAME='spineWasm' \
         -s ENVIRONMENT=web -s FILESYSTEM=0 -s NO_EXIT_RUNTIME=1 -s LLD_REPORT_UNDEFINED \
@@ -94,6 +142,5 @@ set(EMS_LINK_FLAGS "${SPINE_EXTRA_FLAGS} ${EVAL_CTOR_FLAG} -s VERBOSE=${VERBOSE_
         --js-library ../library_spine.js \
         --closure=${ENABLE_CLOSURE_COMPILER} \
         --closure-args=--externs=../library_spine_externs.js")
-
 
 set_target_properties(${APP_NAME} PROPERTIES CXX_STANDARD 11 LINK_FLAGS ${EMS_LINK_FLAGS})
