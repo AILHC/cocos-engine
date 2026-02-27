@@ -1,1 +1,1 @@
-export const customEngineVersion = '65'; //当前SVN的版本号
+export const customEngineVersion = '66'; //当前SVN的版本号

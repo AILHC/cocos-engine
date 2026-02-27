@@ -16,6 +16,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules")
 set(BUILD_WASM 1)
 set(ENABLE_JSON_PARSER 1)
 set(ENABLE_BINARY_PARSER 1)
+# 统一内存调试选项：同时启用内存导出函数和JS内存信息模块
+# 使用方式：cmake -DSPINE_MEMORY_DEBUG=ON ..
+option(SPINE_MEMORY_DEBUG "启用内存调试功能（同时导出内存函数和JS内存信息模块）" ON)
 # set(ENABLE_PROFILING "--profiling")
 # set(ENABLE_MEMORY_PROFILING "--memoryprofiler -sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=$demangleAll")
 set(VERBOSE_LOG 0)
@@ -58,6 +61,22 @@ else()
     set(EVAL_CTOR_FLAG "") # asmjs doesn't support EVAL_CTORS
 endif()
 
+# 统一内存调试处理
+# 启用 SPINE_MEMORY_DEBUG 时，同时：
+# 1. 导出内存相关函数（___heap_base, _sbrk）
+# 2. 添加 JS 内存信息模块
+if(SPINE_MEMORY_DEBUG)
+    # 内存导出的函数列表（注意：emscripten_stack_get_base/end 在新版可能不可用）
+    set(MEMORY_EXPORTED_FUNCTIONS "'___heap_base','_sbrk',")
+    # 附加 JS 内存信息模块
+    set(SPINE_MEMORY_JS "--post-js ../spine-memory-js.js")
+    # 关闭 JS 压缩，方便查看导出的函数
+    # set(ENABLE_CLOSURE_COMPILER 0)
+    message(">>> 启用内存调试功能，关闭 JS 压缩")
+else()
+    set(SPINE_MEMORY_JS "")
+endif()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SPINE_EXTRA_FLAGS} -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 -DENABLE_JSON_PARSER=${ENABLE_JSON_PARSER} -DENABLE_BINARY_PARSER=${ENABLE_BINARY_PARSER}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SPINE_EXTRA_FLAGS} -fno-exceptions -fno-rtti -Wno-inconsistent-missing-override ${ENABLE_PROFILING} \
     -DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 -DENABLE_JSON_PARSER=${ENABLE_JSON_PARSER} -DENABLE_BINARY_PARSER=${ENABLE_BINARY_PARSER}")
@@ -70,6 +89,7 @@ message(">>> ENABLE_JSON_PARSER: ${ENABLE_JSON_PARSER}")
 message(">>> ENABLE_BINARY_PARSER: ${ENABLE_BINARY_PARSER}")
 message(">>> ENABLE_PROFILING: ${ENABLE_PROFILING}")
 message(">>> ENABLE_MEMORY_PROFILING: ${ENABLE_MEMORY_PROFILING}")
+message(">>> SPINE_MEMORY_DEBUG: ${SPINE_MEMORY_DEBUG}")
 message(">>> SPINE_EXTRA_FLAGS: ${SPINE_EXTRA_FLAGS}")
 message(">>> EVAL_CTOR_FLAG: ${EVAL_CTOR_FLAG}")
 message(">>> --------------------------------------------------------------")
@@ -138,8 +158,9 @@ set(EMS_LINK_FLAGS "${SPINE_EXTRA_FLAGS} ${EVAL_CTOR_FLAG} -s VERBOSE=${VERBOSE_
         -flto --no-entry --bind -s USE_ES6_IMPORT_META=0 -s EXPORT_ES6=1 -s MODULARIZE=1 -s EXPORT_NAME='spineWasm' \
         -s ENVIRONMENT=web -s FILESYSTEM=0 -s NO_EXIT_RUNTIME=1 -s LLD_REPORT_UNDEFINED \
         -s MIN_SAFARI_VERSION=110000 \
-        -s EXPORTED_FUNCTIONS=['_spineListenerCallBackFromJS','_spineTrackListenerCallback'] \
+        -s EXPORTED_FUNCTIONS=[${MEMORY_EXPORTED_FUNCTIONS}'_spineListenerCallBackFromJS','_spineTrackListenerCallback'] \
         --js-library ../library_spine.js \
+        ${SPINE_MEMORY_JS} \
         --closure=${ENABLE_CLOSURE_COMPILER} \
         --closure-args=--externs=../library_spine_externs.js")
 
