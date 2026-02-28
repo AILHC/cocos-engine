@@ -12,13 +12,13 @@ function getSpineMemoryInfo() {
     const heapTotal = Module.HEAP8 ? Module.HEAP8.length : 0;
 
     return {
-        heapUsed: heapEnd,
-        heapTotal: heapTotal,
-        heapFree: heapTotal - heapEnd,
-        // 方便阅读的格式化输出
-        get heapUsedMB() { return (this.heapUsed / 1024 / 1024).toFixed(2); },
-        get heapTotalMB() { return (this.heapTotal / 1024 / 1024).toFixed(2); },
-        get heapFreeMB() { return (this.heapFree / 1024 / 1024).toFixed(2); }
+        ["heapUsed"]: heapEnd,
+        ["heapTotal"]: heapTotal,
+        ["heapFree"]: heapTotal - heapEnd,
+        // 方便阅读的格式化输出（使用字符串访问防止 Closure Compiler 压缩属性引用）
+        get ["heapUsedMB"]() { return (this["heapUsed"] / 1024 / 1024).toFixed(2); },
+        get ["heapTotalMB"]() { return (this["heapTotal"] / 1024 / 1024).toFixed(2); },
+        get ["heapFreeMB"]() { return (this["heapFree"] / 1024 / 1024).toFixed(2); }
     };
 }
 

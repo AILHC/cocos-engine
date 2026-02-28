@@ -70,9 +70,9 @@ if(SPINE_MEMORY_DEBUG)
     set(MEMORY_EXPORTED_FUNCTIONS "'___heap_base','_sbrk',")
     # 附加 JS 内存信息模块
     set(SPINE_MEMORY_JS "--post-js ../spine-memory-js.js")
-    # 关闭 JS 压缩，方便查看导出的函数
-    # set(ENABLE_CLOSURE_COMPILER 0)
-    message(">>> 启用内存调试功能，关闭 JS 压缩")
+    # 开启 JS 压缩（强制开启，即使在内存调试模式）
+    # set(ENABLE_CLOSURE_COMPILER 1)
+    message(">>> 启用内存调试功能，同时开启 JS 压缩")
 else()
     set(SPINE_MEMORY_JS "")
 endif()
