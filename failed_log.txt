@@ -1,0 +1,155 @@
+[64095:0304/192702.248903:ERROR:mach_port_rendezvous.cc(380)] bootstrap_look_up com.cocos.creator.MachPortRendezvousServer.63442: Unknown service name (1102)
+[64095:0304/192702.249027:ERROR:shared_memory_switch.cc(237)] No rendezvous client, terminating process (parent died?)
+android.enableJetifier=true已存在
+Starting a Gradle Daemon (subsequent builds will be faster)
+
+> Configure project :Client
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :libcocos
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :libservice
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 34
+
+This Android Gradle plugin (8.0.2) was tested up to compileSdk = 33.
+
+You are strongly encouraged to update your project to use a newer
+Android Gradle plugin that has been tested with compileSdk = 34.
+
+If you are already using the latest version of the Android Gradle plugin,
+you may need to wait until a newer version with support for compileSdk = 34 is available.
+
+To suppress this warning, add/update
+    android.suppressUnsupportedCompileSdk=34
+to this project's gradle.properties.
+WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 34
+
+This Android Gradle plugin (8.0.2) was tested up to compileSdk = 33.
+
+You are strongly encouraged to update your project to use a newer
+Android Gradle plugin that has been tested with compileSdk = 34.
+
+If you are already using the latest version of the Android Gradle plugin,
+you may need to wait until a newer version with support for compileSdk = 34 is available.
+
+To suppress this warning, add/update
+    android.suppressUnsupportedCompileSdk=34
+to this project's gradle.properties.
+
+> Task :libservice:preBuild UP-TO-DATE
+> Task :libservice:preReleaseBuild UP-TO-DATE
+> Task :libservice:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :libservice:mergeReleaseNativeLibs NO-SOURCE
+> Task :libservice:stripReleaseDebugSymbols NO-SOURCE
+> Task :libservice:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :libservice:generateReleaseResValues UP-TO-DATE
+> Task :libservice:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :libcocos:preBuild UP-TO-DATE
+> Task :libcocos:preReleaseBuild UP-TO-DATE
+> Task :libcocos:generateReleaseBuildConfig UP-TO-DATE
+> Task :libcocos:generateReleaseResValues UP-TO-DATE
+> Task :libcocos:generateReleaseResources UP-TO-DATE
+> Task :libcocos:packageReleaseResources UP-TO-DATE
+> Task :libcocos:parseReleaseLocalResources UP-TO-DATE
+> Task :libcocos:processReleaseManifest UP-TO-DATE
+> Task :libcocos:generateReleaseRFile UP-TO-DATE
+> Task :libcocos:javaPreCompileRelease UP-TO-DATE
+> Task :libcocos:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :libcocos:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :libservice:generateReleaseResources UP-TO-DATE
+> Task :libservice:packageReleaseResources UP-TO-DATE
+> Task :libservice:parseReleaseLocalResources UP-TO-DATE
+> Task :libservice:processReleaseManifest UP-TO-DATE
+> Task :libservice:generateReleaseRFile UP-TO-DATE
+> Task :libservice:extractReleaseAnnotations UP-TO-DATE
+> Task :libservice:javaPreCompileRelease UP-TO-DATE
+> Task :libservice:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :libservice:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :libservice:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :libservice:mergeReleaseShaders UP-TO-DATE
+> Task :libservice:compileReleaseShaders NO-SOURCE
+> Task :libservice:generateReleaseAssets UP-TO-DATE
+> Task :libservice:packageReleaseAssets UP-TO-DATE
+> Task :libservice:prepareLintJarForPublish UP-TO-DATE
+> Task :libservice:prepareReleaseArtProfile UP-TO-DATE
+> Task :libservice:processReleaseJavaRes NO-SOURCE
+> Task :libservice:mergeReleaseJavaResource UP-TO-DATE
+> Task :libservice:syncReleaseLibJars UP-TO-DATE
+> Task :libservice:writeReleaseAarMetadata UP-TO-DATE
+> Task :libservice:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :libcocos:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :libcocos:mergeReleaseNativeLibs NO-SOURCE
+> Task :libcocos:stripReleaseDebugSymbols NO-SOURCE
+> Task :libcocos:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :libcocos:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :libcocos:extractReleaseAnnotations UP-TO-DATE
+> Task :libcocos:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :libcocos:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :libcocos:mergeReleaseShaders UP-TO-DATE
+> Task :libcocos:compileReleaseShaders NO-SOURCE
+> Task :libcocos:generateReleaseAssets UP-TO-DATE
+> Task :libcocos:packageReleaseAssets UP-TO-DATE
+> Task :libcocos:prepareLintJarForPublish UP-TO-DATE
+> Task :libcocos:prepareReleaseArtProfile UP-TO-DATE
+> Task :libcocos:processReleaseJavaRes NO-SOURCE
+> Task :libcocos:mergeReleaseJavaResource UP-TO-DATE
+> Task :libcocos:syncReleaseLibJars UP-TO-DATE
+> Task :libcocos:writeReleaseAarMetadata UP-TO-DATE
+> Task :libcocos:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :Client:preBuild UP-TO-DATE
+> Task :Client:preReleaseBuild UP-TO-DATE
+> Task :Client:javaPreCompileRelease UP-TO-DATE
+> Task :Client:checkReleaseAarMetadata UP-TO-DATE
+> Task :Client:generateReleaseResValues UP-TO-DATE
+> Task :Client:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :Client:generateReleaseResources UP-TO-DATE
+> Task :Client:mergeReleaseResources UP-TO-DATE
+> Task :Client:packageReleaseResources UP-TO-DATE
+> Task :Client:parseReleaseLocalResources UP-TO-DATE
+> Task :Client:createReleaseCompatibleScreenManifests
+> Task :Client:extractDeepLinksRelease UP-TO-DATE
+> Task :libcocos:extractDeepLinksRelease UP-TO-DATE
+> Task :libservice:extractDeepLinksRelease UP-TO-DATE
+> Task :Client:processReleaseMainManifest
+> Task :Client:processReleaseManifest
+> Task :libservice:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :Client:extractProguardFiles UP-TO-DATE
+> Task :libcocos:bundleLibResRelease NO-SOURCE
+> Task :libcocos:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :libcocos:createFullJarRelease UP-TO-DATE
+> Task :libcocos:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :libservice:bundleLibResRelease NO-SOURCE
+> Task :libservice:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :libservice:createFullJarRelease UP-TO-DATE
+> Task :libservice:writeReleaseLintModelMetadata UP-TO-DATE
+
+> Task :Client:configureCMakeRelWithDebInfo[arm64-v8a] FAILED
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+
+> Task :Client:processReleaseManifestForPackage
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':Client:configureCMakeRelWithDebInfo[arm64-v8a]'.
+> [CXX1409] /Users/mz-packer/P6/build/qgp6-zgdz-formal-android-release-build/proj/build/RelWithDebInfo/3lx5f2k5/arm64-v8a/android_gradle_build.json release|arm64-v8a : expected buildFiles file '/Users/mz-packer/P6/branches/release-2025-08-16-release/Android_Next/Client/native/engine/android/Pre-AutoLoadPlulgins.cmake' to exist
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.10/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 8s
+67 actionable tasks: 5 executed, 62 up-to-date
+Build step 'Execute shell' marked build as failure
+Finished: FAILURE

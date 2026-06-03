@@ -42,7 +42,7 @@
     #include <sstream>
     #include "base/std/container/array.h"
 
-    #define JSB_FUNC_DEFAULT_MAX_ARG_COUNT (10)
+    #define JSB_FUNC_DEFAULT_MAX_ARG_COUNT (20)
 
 namespace se {
 

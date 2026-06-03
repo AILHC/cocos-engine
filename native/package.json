@@ -3,7 +3,8 @@
   "description": "Native implementation of Cocos Creator.",
   "main": "gulpfile.js",
   "scripts": {
-    "clear-platform": "node ./utils/clear-platform.js"
+    "clear-platform": "node ./utils/clear-platform.js",
+    "gen-simulator":"gulp gen-simulator"
   },
   "devDependencies": {
     "gulp": "^4.0.2",

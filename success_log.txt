@@ -1,0 +1,201 @@
+2026-3-3 17:36:06 - debug: ================================ build Task (android) Finished in (5 min 50 s)ms ================================
+
+[86374:0303/173606.988974:ERROR:mach_port_rendezvous.cc(380)] bootstrap_look_up com.cocos.creator.MachPortRendezvousServer.85573: Unknown service name (1102)
+[86374:0303/173606.989104:ERROR:shared_memory_switch.cc(237)] No rendezvous client, terminating process (parent died?)
+android.enableJetifier=true已存在
+Starting a Gradle Daemon (subsequent builds will be faster)
+
+> Configure project :Client
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :libcocos
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :libservice
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 34
+
+This Android Gradle plugin (8.0.2) was tested up to compileSdk = 33.
+
+You are strongly encouraged to update your project to use a newer
+Android Gradle plugin that has been tested with compileSdk = 34.
+
+If you are already using the latest version of the Android Gradle plugin,
+you may need to wait until a newer version with support for compileSdk = 34 is available.
+
+To suppress this warning, add/update
+    android.suppressUnsupportedCompileSdk=34
+to this project's gradle.properties.
+WARNING: We recommend using a newer Android Gradle plugin to use compileSdk = 34
+
+This Android Gradle plugin (8.0.2) was tested up to compileSdk = 33.
+
+You are strongly encouraged to update your project to use a newer
+Android Gradle plugin that has been tested with compileSdk = 34.
+
+If you are already using the latest version of the Android Gradle plugin,
+you may need to wait until a newer version with support for compileSdk = 34 is available.
+
+To suppress this warning, add/update
+    android.suppressUnsupportedCompileSdk=34
+to this project's gradle.properties.
+
+> Task :libservice:preBuild UP-TO-DATE
+> Task :libservice:preReleaseBuild UP-TO-DATE
+> Task :libservice:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :libservice:mergeReleaseNativeLibs NO-SOURCE
+> Task :libservice:stripReleaseDebugSymbols NO-SOURCE
+> Task :libservice:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :libservice:generateReleaseResValues UP-TO-DATE
+> Task :libservice:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :libcocos:preBuild UP-TO-DATE
+> Task :libcocos:preReleaseBuild UP-TO-DATE
+> Task :libcocos:generateReleaseBuildConfig UP-TO-DATE
+> Task :libcocos:generateReleaseResValues UP-TO-DATE
+> Task :libcocos:generateReleaseResources UP-TO-DATE
+> Task :libcocos:packageReleaseResources UP-TO-DATE
+> Task :libcocos:parseReleaseLocalResources UP-TO-DATE
+> Task :libcocos:processReleaseManifest UP-TO-DATE
+> Task :libcocos:generateReleaseRFile UP-TO-DATE
+> Task :libcocos:javaPreCompileRelease UP-TO-DATE
+> Task :libcocos:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :libcocos:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :libservice:generateReleaseResources UP-TO-DATE
+> Task :libservice:packageReleaseResources UP-TO-DATE
+> Task :libservice:parseReleaseLocalResources UP-TO-DATE
+> Task :libservice:processReleaseManifest UP-TO-DATE
+> Task :libservice:generateReleaseRFile UP-TO-DATE
+> Task :libservice:extractReleaseAnnotations UP-TO-DATE
+> Task :libservice:javaPreCompileRelease UP-TO-DATE
+> Task :libservice:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :libservice:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :libservice:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :libservice:mergeReleaseShaders UP-TO-DATE
+> Task :libservice:compileReleaseShaders NO-SOURCE
+> Task :libservice:generateReleaseAssets UP-TO-DATE
+> Task :libservice:packageReleaseAssets UP-TO-DATE
+> Task :libservice:prepareLintJarForPublish UP-TO-DATE
+> Task :libservice:prepareReleaseArtProfile UP-TO-DATE
+> Task :libservice:processReleaseJavaRes NO-SOURCE
+> Task :libservice:mergeReleaseJavaResource UP-TO-DATE
+> Task :libservice:syncReleaseLibJars UP-TO-DATE
+> Task :libservice:writeReleaseAarMetadata UP-TO-DATE
+> Task :libservice:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :libcocos:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :libcocos:mergeReleaseNativeLibs NO-SOURCE
+> Task :libcocos:stripReleaseDebugSymbols NO-SOURCE
+> Task :libcocos:copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :libcocos:extractDeepLinksForAarRelease UP-TO-DATE
+> Task :libcocos:extractReleaseAnnotations UP-TO-DATE
+> Task :libcocos:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :libcocos:mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :libcocos:mergeReleaseShaders UP-TO-DATE
+> Task :libcocos:compileReleaseShaders NO-SOURCE
+> Task :libcocos:generateReleaseAssets UP-TO-DATE
+> Task :libcocos:packageReleaseAssets UP-TO-DATE
+> Task :libcocos:prepareLintJarForPublish UP-TO-DATE
+> Task :libcocos:prepareReleaseArtProfile UP-TO-DATE
+> Task :libcocos:processReleaseJavaRes NO-SOURCE
+> Task :libcocos:mergeReleaseJavaResource UP-TO-DATE
+> Task :libcocos:syncReleaseLibJars UP-TO-DATE
+> Task :libcocos:writeReleaseAarMetadata UP-TO-DATE
+> Task :libcocos:bundleReleaseLocalLintAar UP-TO-DATE
+> Task :Client:preBuild UP-TO-DATE
+> Task :Client:preReleaseBuild UP-TO-DATE
+> Task :Client:javaPreCompileRelease UP-TO-DATE
+> Task :Client:checkReleaseAarMetadata UP-TO-DATE
+> Task :Client:generateReleaseResValues UP-TO-DATE
+> Task :Client:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :Client:generateReleaseResources UP-TO-DATE
+> Task :Client:mergeReleaseResources UP-TO-DATE
+> Task :Client:packageReleaseResources UP-TO-DATE
+> Task :Client:parseReleaseLocalResources UP-TO-DATE
+> Task :Client:createReleaseCompatibleScreenManifests
+> Task :Client:extractDeepLinksRelease UP-TO-DATE
+> Task :libcocos:extractDeepLinksRelease UP-TO-DATE
+> Task :libservice:extractDeepLinksRelease UP-TO-DATE
+> Task :Client:processReleaseMainManifest
+> Task :Client:processReleaseManifest
+> Task :libservice:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :Client:extractProguardFiles UP-TO-DATE
+> Task :libcocos:bundleLibResRelease NO-SOURCE
+> Task :libcocos:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :libcocos:createFullJarRelease UP-TO-DATE
+> Task :libcocos:writeReleaseLintModelMetadata UP-TO-DATE
+> Task :libservice:bundleLibResRelease NO-SOURCE
+> Task :libservice:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :libservice:createFullJarRelease UP-TO-DATE
+> Task :libservice:writeReleaseLintModelMetadata UP-TO-DATE
+
+> Task :Client:configureCMakeRelWithDebInfo[arm64-v8a]
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+C/C++: -- Detecting CXX compiler ABI info
+C/C++: -- Detecting CXX compiler ABI info - done
+C/C++: -- Check for working CXX compiler: /Users/mz-packer/Library/Android/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ - skipped
+C/C++: -- Detecting CXX compile features
+C/C++: -- Detecting CXX compile features - done
+C/C++: -- The ASM compiler identification is Clang with GNU-like command-line
+C/C++: -- Found assembler: /Users/mz-packer/Library/Android/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang
+C/C++: -- Detecting C compiler ABI info
+C/C++: -- Detecting C compiler ABI info - done
+C/C++: -- Check for working C compiler: /Users/mz-packer/Library/Android/sdk/ndk/21.3.6528147/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang - skipped
+C/C++: -- Detecting C compile features
+C/C++: -- Detecting C compile features - done
+C/C++: -- platform: Android
+C/C++: -- Ignore NO_WERROR
+C/C++: -- OPTION BUILTIN_COCOS_X_PATH:	/Applications/Cocos/Creator/3.8.6/CocosCreator.app/Contents/Resources/resources/3d/engine/native
+C/C++: -- OPTION USE_BUILTIN_EXTERNAL:	OFF
+C/C++: -- OPTION USE_MODULES:	OFF
+C/C++: -- OPTION CC_USE_METAL:	
+C/C++: -- OPTION CC_USE_GLES3:	ON
+C/C++: -- OPTION CC_USE_GLES2:	ON
+C/C++: -- OPTION CC_USE_VULKAN:	OFF
+C/C++: -- OPTION CC_DEBUG_FORCE:	OFF
+C/C++: -- OPTION USE_SE_V8:	ON
+C/C++: -- OPTION USE_SE_JSVM:	OFF
+C/C++: -- OPTION USE_V8_DEBUGGER:	ON
+C/C++: -- OPTION USE_V8_DEBUGGER_FORCE:	OFF
+C/C++: -- OPTION USE_SE_SM:	OFF
+C/C++: -- OPTION USE_SOCKET:	ON
+C/C++: -- OPTION USE_AUDIO:	ON
+C/C++: -- OPTION USE_EDIT_BOX:	ON
+C/C++: -- OPTION USE_VIDEO:	ON
+C/C++: -- OPTION USE_WEBVIEW:	OFF
+C/C++: -- OPTION USE_MIDDLEWARE:	ON
+C/C++: -- OPTION USE_DRAGONBONES:	OFF
+C/C++: -- OPTION USE_SPINE:	ON
+C/C++: -- OPTION USE_SPINE_3_8:	ON
+C/C++: -- OPTION USE_SPINE_4_2:	OFF
+C/C++: -- OPTION USE_WEBSOCKET_SERVER:	OFF
+C/C++: -- OPTION USE_PHYSICS_PHYSX:	OFF
+C/C++: -- OPTION USE_JOB_SYSTEM_TBB:	OFF
+C/C++: -- OPTION USE_JOB_SYSTEM_TASKFLOW:	OFF
+C/C++: -- OPTION USE_XR:	OFF
+C/C++: -- OPTION USE_SERVER_MODE:	OFF
+C/C++: -- OPTION USE_AR_MODULE:	OFF
+C/C++: -- OPTION USE_AR_AUTO:	OFF
+C/C++: -- OPTION USE_AR_CORE:	OFF
+C/C++: -- OPTION USE_AR_ENGINE:	OFF
+C/C++: -- OPTION USE_CCACHE:	OFF
+C/C++: -- OPTION CCACHE_EXECUTABLE:	CCACHE_EXECUTABLE-NOTFOUND
+C/C++: -- OPTION NODE_EXECUTABLE:	/opt/homebrew/bin/node
+C/C++: -- OPTION NET_MODE:	0
+C/C++: -- OPTION USE_REMOTE_LOG:	OFF
+C/C++: -- OPTION USE_BOX2D_JSB:	OFF
+C/C++: -- platform path: 
+C/C++: -- Try generating /Users/mz-packer/P6/branches/release-2025-08-16-release/Android_Next/Client/native/engine/android/Pre-AutoLoadPlulgins.cmake
+C/C++: --  execute /opt/homebrew/bin/node plugin_parser.js
+C/C++: [searching plugins]   plugin dir found: /Users/mz-packer/P6/branches/release-2025-08-16-release/Android_Next/Client/native/plugins/akplayer
+C/C++: Engine version: 3.8.6
+C/C++: Parsing plugin directory akplayer
+C/C++:  record plugin akplayer
+C/C++: -- Searching hook files Pre*.cmake or *Pre.cmake in /Users/mz-packer/P6/branches/release-2025-08-16-release/Android_Next/Client/native/engine/android
+C/C++: -- ::Loading Pre-AutoLoadPlulgins.cmake
+C/C++: -- ::Loading Pre-service.cmake
+C/C++: -- Generating plugin_registry code, total 1 plugins
+C/C++: -- Searching hook files Post*.cmake or *Post.cmake in /Users/mz-packer/P6/branches/release-2025-08-16-release/Android_Next/Client/native/engine/android
+C/C++: -- ::Loading Post-service.cmake
+C/C++: -- Configuring done
+C/C++: -- Generating done
+C/C++: -- Build files have been written to: /Users/mz-packer/P6/build/qgp6-zgdz-formal-android-release-build/proj/build/RelWithDebInfo/3lx5f2k5/arm64-v8a
