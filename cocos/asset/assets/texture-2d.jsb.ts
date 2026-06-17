@@ -22,7 +22,7 @@
  THE SOFTWARE.
 */
 
-import { EDITOR, TEST } from 'internal:constants'
+import { EDITOR, NODEJS, TEST } from 'internal:constants'
 import { ImageAsset } from './image-asset';
 import { SimpleTexture } from './simple-texture';
 import { TextureBase } from './texture-base.jsb';
@@ -57,18 +57,23 @@ texture2DProto._ctor = function () {
 };
 
 texture2DProto._serialize = function (ctxForExporting: any) {
-    if (EDITOR || TEST) {
+    if (EDITOR || NODEJS || TEST) {
         return {
             base: TextureBase.prototype._serialize(ctxForExporting),
             mipmaps: this._mipmaps.map((mipmap) => {
                 if (!mipmap || !mipmap._uuid) {
                     return null;
                 }
-                if (ctxForExporting && ctxForExporting._compressUuid) {
-                    // ctxForExporting.dependsOn('_textureSource', texture); TODO
-                    return EditorExtends.UuidUtils.compressUuid(mipmap._uuid, true);
+                let uuid = mipmap._uuid;
+                if (ctxForExporting) {
+                    if (ctxForExporting._compressUuid) {
+                        uuid = EditorExtends.UuidUtils.compressUuid(mipmap._uuid, true);
+                    }
+                    if (uuid) {
+                        ctxForExporting.dependsOn('_textureSource', uuid);
+                    }
                 }
-                return mipmap._uuid;
+                return uuid;
             }),
         };
     }

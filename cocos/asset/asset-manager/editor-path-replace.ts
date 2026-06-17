@@ -21,15 +21,16 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 */
-import { EDITOR, NATIVE, PREVIEW, TEST } from 'internal:constants';
+import { EDITOR, NODEJS, NATIVE, PREVIEW, TEST } from 'internal:constants';
 import { assert, settings, SettingsCategory } from '../../core';
 import { fetchPipeline, pipeline } from './shared';
 import Task from './task';
 
 declare const Editor: any;
-if ((EDITOR || PREVIEW) && !TEST) {
+if ((EDITOR || PREVIEW || NODEJS) && !TEST) {
     const cache: {[uuid: string]: string | null} = {};
     const resolveMap: { [uuid: string]: Function[] } = {};
+    let printedNodejsAssetDBWarning = false;
     const replaceExtension  = (task: Task, done): void => {
         task.output = task.input;
         (async (): Promise<void> => {
@@ -81,8 +82,27 @@ if ((EDITOR || PREVIEW) && !TEST) {
             let text = '';
             if (EDITOR) {
                 const info = await Editor.Message.request('asset-db', 'query-asset-info', uuid);
-                if (info && info.library['.cconb']) {
+                const library = info?.library;
+                if (library && (library['.cconb'] || (library['.bin'] && Object.keys(library).length === 1))) {
                     text = '.cconb';
+                }
+            } else if (NODEJS) {
+                const assetDB = (globalThis as unknown as {
+                    AssetDB?: {
+                        queryAsset?: (uuid: string) => { meta?: { files?: unknown } } | Promise<{ meta?: { files?: unknown } }>;
+                    };
+                }).AssetDB;
+                if (!assetDB || typeof assetDB.queryAsset !== 'function') {
+                    if (!printedNodejsAssetDBWarning) {
+                        console.warn('editor-path-replace: NODEJS mode requires globalThis.AssetDB.queryAsset; fallback to empty extension');
+                        printedNodejsAssetDBWarning = true;
+                    }
+                    text = '';
+                } else {
+                    const files = (await assetDB.queryAsset(uuid))?.meta?.files;
+                    if (Array.isArray(files) && files.length === 1 && (files[0] === '.bin' || files[0] === '.cconb')) {
+                        text = '.cconb';
+                    }
                 }
             } else {
                 let previewServer = '';
@@ -101,6 +121,10 @@ if ((EDITOR || PREVIEW) && !TEST) {
         } catch (error) {
             console.error(error);
             cache[uuid] = '';
+            if (resolveMap[uuid]) {
+                resolveMap[uuid].forEach((func): any => func(''));
+                resolveMap[uuid] = [];
+            }
             return '';
         }
     };
