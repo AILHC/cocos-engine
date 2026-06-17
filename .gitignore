@@ -16,6 +16,7 @@ node_modules
 npm-debug.log
 DebugInfos.json
 playground/library
+/editor/library/
 tests/core/serialization/ccob-serialized-gallery
 scripts/build-engine/dist
 scripts/native-pack-tool/dist
