@@ -653,7 +653,7 @@ export class ImageAsset extends Asset {
             mipmapLevelDataSize: [],
         };
 
-        if (EDITOR) {
+        if (EDITOR || NODEJS) {
             this._exportedExts = null;
         }
 

@@ -649,7 +649,7 @@ export class SpriteFrame extends Asset {
     constructor (name?: string) {
         super(name);
 
-        if (EDITOR) {
+        if (EDITOR || NODEJS) {
             // Atlas asset uuid
             this._atlasUuid = '';
         }
@@ -1298,7 +1298,7 @@ export class SpriteFrame extends Asset {
             }
         }
 
-        if (EDITOR) {
+        if (EDITOR || NODEJS) {
             self._atlasUuid = data.atlas ? data.atlas : '';
         }
 
