@@ -23,7 +23,7 @@
  THE SOFTWARE.
 */
 
-import { DEV, EDITOR, SUPPORT_JIT, TEST } from 'internal:constants';
+import { DEV, EDITOR, SUPPORT_JIT, TEST, NODEJS } from 'internal:constants';
 import { errorID, warnID, error } from '../platform/debug';
 import * as js from '../utils/js';
 import { getSuper } from '../utils/js';
@@ -179,7 +179,7 @@ function define (className, baseClass, options): any {
 
     const cls = doDefine(className, baseClass, options);
 
-    if (EDITOR) {
+    if (EDITOR || NODEJS) {
         // for RenderPipeline, RenderFlow, RenderStage
         const isRenderPipeline = js.isChildClassOf(baseClass, legacyCC.RenderPipeline);
         const isRenderFlow = js.isChildClassOf(baseClass, legacyCC.RenderFlow);
@@ -196,7 +196,9 @@ function define (className, baseClass, options): any {
             }
             // 增加了 hidden: 开头标识，使它最终不会显示在 Editor inspector 的添加组件列表里
 
-            window.EditorExtends && window.EditorExtends.Component.addMenu(cls, `hidden:${renderName}/${className}`, -1);
+            if (window.EditorExtends) {
+                window.EditorExtends.Component.addMenu(cls, `hidden:${renderName}/${className}`, -1);
+            }
         }
 
         // Note: `options.ctor` should be the same as `cls` except if
