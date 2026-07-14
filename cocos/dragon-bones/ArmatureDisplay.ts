@@ -469,7 +469,7 @@ export class ArmatureDisplay extends UIRenderer {
      * transformation with bones.
      * @zh 获取 socket nodes，socket nodes 被注册到组件上，可以随骨骼做同步运动变换。
      */
-    get socketNodes (): Map<string, Node> { return this._socketNodes; }
+    get socketNodes (): globalThis.Map<string, Node> { return this._socketNodes; }
     /**
      * @en The armature is the core of the skeletal animation system.
      * @zh 骨架是骨骼动画系统的核心。
@@ -588,8 +588,8 @@ export class ArmatureDisplay extends UIRenderer {
     protected _enumArmatures: any = Enum({});
     protected _enumAnimations: any = Enum({});
 
-    protected _socketNodes = new Map<string, Node>();
-    protected _cachedSockets = new Map<string, BoneIndex>();
+    protected _socketNodes: globalThis.Map<string, Node> = new Map<string, Node>();
+    protected _cachedSockets: globalThis.Map<string, BoneIndex> = new Map<string, BoneIndex>();
 
     @serializable
     protected _sockets: DragonBoneSocket[] = [];
