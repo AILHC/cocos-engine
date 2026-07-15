@@ -80,8 +80,9 @@ if ((EDITOR || PREVIEW || NODEJS) && !TEST) {
         cache[uuid] = null;
         try {
             let text = '';
-            if (EDITOR) {
-                const info = await Editor.Message.request('asset-db', 'query-asset-info', uuid);
+            const editorMessage = typeof Editor === 'undefined' || !Editor ? undefined : Editor.Message;
+            if (EDITOR && typeof editorMessage?.request === 'function') {
+                const info = await editorMessage.request('asset-db', 'query-asset-info', uuid);
                 const library = info?.library;
                 if (library && (library['.cconb'] || (library['.bin'] && Object.keys(library).length === 1))) {
                     text = '.cconb';
