@@ -260,4 +260,6 @@ export class BufferBuilder {
 
 cclegacy.internal.parseCCONJson = parseCCONJson;
 cclegacy.internal.decodeCCONBinary = decodeCCONBinary;
+cclegacy.internal.encodeCCONBinary = encodeCCONBinary;
 cclegacy.internal.CCON = CCON;
+cclegacy.internal.BufferBuilder = BufferBuilder;
