@@ -1,0 +1,21 @@
+{
+  "exclude": [
+    "/.circleci/",
+    "/.codegraph/",
+    "/.github/",
+    "/.idea/",
+    "/.vscode/",
+    "/cocos/.claude/",
+    "/docs/",
+    "/editor/",
+    "/external/",
+    "/licenses/",
+    "/native/external/",
+    "/native/tools/",
+    "/native/vendor/",
+    "/scripts/",
+    "/templates/",
+    "/tiledmap_bak/",
+    "/vendor/"
+  ]
+}
