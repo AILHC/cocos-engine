@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013-2016 Chukong Technologies Inc.
  Copyright (c) 2017-2023 Xiamen Yaji Software Co., Ltd.
 
@@ -27,7 +27,7 @@ import { ccclass } from 'cc.decorator';
 import { Asset } from '../../asset/assets';
 import { cclegacy } from '../../core';
 
-const BMFONT_NAME = 'JYFZ';
+const BMFONT_OUTLINE_NAMES = ['JYFZ', 'JYFZMSDF', 'TILTJYFZMSDF'];
 
 /**
  * @en Class for Font handling.
@@ -43,7 +43,7 @@ export class Font extends Asset {
     isBmfontOutlineFont (): boolean {
         let check_ret = this._checkedBmfontOutline;
         if (check_ret === undefined) {
-            check_ret = this.name === BMFONT_NAME;
+            check_ret = BMFONT_OUTLINE_NAMES.indexOf(this.name) >= 0;
             this._checkedBmfontOutline = check_ret;
         }
         return check_ret;

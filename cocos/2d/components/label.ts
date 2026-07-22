@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013-2016 Chukong Technologies Inc.
  Copyright (c) 2017-2023 Xiamen Yaji Software Co., Ltd.
 
@@ -46,6 +46,11 @@ import { BmfontOutlineHelper } from '../assembler/label/bmfont-outline-helper';
 import { NodeEventType } from '../../scene-graph/node-event';
 
 const tempColor = Color.WHITE.clone();
+
+function isBitmapFontLike (font: Font | null): font is BitmapFont {
+    const bitmapFont = font as any;
+    return !!bitmapFont && (bitmapFont instanceof BitmapFont || !!bitmapFont.spriteFrame || !!bitmapFont.fntConfig || !!bitmapFont.fontDefDictionary);
+}
 /**
  * @en Enum for horizontal text alignment.
  *
@@ -350,7 +355,7 @@ export class Label extends UIRenderer {
      * 文本字符之间的间距。仅在使用 BMFont 位图字体时生效。
      */
     @visible(function (this: Label) {
-        return !this._isSystemFontUsed && this._font instanceof BitmapFont;
+        return !this._isSystemFontUsed && isBitmapFontLike(this._font);
     })
     @displayOrder(9)
     get spacingX (): number {
@@ -532,7 +537,7 @@ export class Label extends UIRenderer {
             return;
         }
 
-        if (oldCacheMode === CacheMode.BITMAP && !(this._font instanceof BitmapFont) && this._ttfSpriteFrame) {
+        if (oldCacheMode === CacheMode.BITMAP && !(isBitmapFontLike(this._font)) && this._ttfSpriteFrame) {
             this._ttfSpriteFrame._resetDynamicAtlasFrame();
         }
         if (oldCacheMode === CacheMode.CHAR) {
@@ -628,7 +633,7 @@ export class Label extends UIRenderer {
      ** 描边效果组件,用于字体描边,只能用于系统字体或 ttf 字体。
      **/
     @editable
-    //@visible(function (this: Label) { return !(this._font instanceof BitmapFont); })
+    //@visible(function (this: Label) { return !(isBitmapFontLike(this._font)); })
     @displayOrder(19)
     get enableOutline (): boolean {
         return this._enableOutline;
@@ -648,7 +653,7 @@ export class Label extends UIRenderer {
      * 改变描边的颜色。
      */
     @editable
-    //@visible(function (this: Label) { return this._enableOutline && !(this._font instanceof BitmapFont); })
+    //@visible(function (this: Label) { return this._enableOutline && !(isBitmapFontLike(this._font)); })
     @displayOrder(20)
     get outlineColor (): Color {
         return this._outlineColor;
@@ -668,7 +673,7 @@ export class Label extends UIRenderer {
      * 改变描边的宽度。
      */
     @editable
-    @visible(function (this: Label) { return this._enableOutline && !(this._font instanceof BitmapFont); })
+    @visible(function (this: Label) { return this._enableOutline && !(isBitmapFontLike(this._font)); })
     @displayOrder(21)
     get outlineWidth (): number {
         return this._outlineWidth;
@@ -684,7 +689,7 @@ export class Label extends UIRenderer {
      * @zh 用于给 Label 组件添加阴影效果，只能用于系统字体或 ttf 字体。在缓存模式为 char 时不可用。
      */
     @editable
-    @visible(function (this: Label) { return !(this._font instanceof BitmapFont) && (this.cacheMode !== CacheMode.CHAR); })
+    @visible(function (this: Label) { return !(isBitmapFontLike(this._font)) && (this.cacheMode !== CacheMode.CHAR); })
     @displayOrder(22)
     get enableShadow (): boolean {
         return this._enableShadow;
@@ -703,7 +708,7 @@ export class Label extends UIRenderer {
      * 阴影的颜色。
      */
     @editable
-    @visible(function (this: Label) { return this._enableShadow && !(this._font instanceof BitmapFont) && (this.cacheMode !== CacheMode.CHAR); })
+    @visible(function (this: Label) { return this._enableShadow && !(isBitmapFontLike(this._font)) && (this.cacheMode !== CacheMode.CHAR); })
     @displayOrder(23)
     get shadowColor (): Color {
         return this._shadowColor;
@@ -722,7 +727,7 @@ export class Label extends UIRenderer {
      * 字体与阴影的偏移。
      */
     @editable
-    @visible(function (this: Label) { return this._enableShadow && !(this._font instanceof BitmapFont) && (this.cacheMode !== CacheMode.CHAR); })
+    @visible(function (this: Label) { return this._enableShadow && !(isBitmapFontLike(this._font)) && (this.cacheMode !== CacheMode.CHAR); })
     @displayOrder(24)
     get shadowOffset (): Vec2 {
         return this._shadowOffset;
@@ -741,7 +746,7 @@ export class Label extends UIRenderer {
      * 阴影的模糊程度。
      */
     @editable
-    @visible(function (this: Label) { return this._enableShadow && !(this._font instanceof BitmapFont) && (this.cacheMode !== CacheMode.CHAR); })
+    @visible(function (this: Label) { return this._enableShadow && !(isBitmapFontLike(this._font)) && (this.cacheMode !== CacheMode.CHAR); })
     @displayOrder(25)
     get shadowBlur (): number {
         return this._shadowBlur;
@@ -788,7 +793,7 @@ export class Label extends UIRenderer {
      * @deprecated since v3.5.0, this is an engine private interface that will be removed in the future.
      */
     get _bmFontOriginalSize (): number {
-        if (this._font instanceof BitmapFont) {
+        if (isBitmapFontLike(this._font)) {
             return this._font.fontSize;
         } else {
             return -1;
@@ -1120,7 +1125,7 @@ export class Label extends UIRenderer {
      */
     public setEntityColor (color: Color): void {
         if (JSB) {
-            if (this._font instanceof BitmapFont) {
+            if (isBitmapFontLike(this._font)) {
                 this._renderEntity.color = color;
             } else {
                 tempColor.set(255, 255, 255, color.a);
@@ -1135,7 +1140,7 @@ export class Label extends UIRenderer {
         }
 
         const font = this._font;
-        if (font && font instanceof BitmapFont) {
+        if (isBitmapFontLike(font)) {
             const spriteFrame = font.spriteFrame;
             // cannot be activated if texture not loaded yet
             if (!spriteFrame || !spriteFrame.texture) {
@@ -1170,7 +1175,8 @@ export class Label extends UIRenderer {
     protected _applyFontTexture (): void {
         this._markForUpdateRenderData();
         const font = this._font;
-        if (font instanceof BitmapFont) {
+        if (isBitmapFontLike(font)) {
+            this._flushAssembler();
             const spriteFrame = font.spriteFrame;
             if (spriteFrame && spriteFrame.texture) {
                 this._texture = spriteFrame;
@@ -1242,7 +1248,7 @@ export class Label extends UIRenderer {
             const sysInfo = minigame.getSystemInfoSync();
             if (Number.parseInt(sysInfo.SDKVersion[0]) < 2) {
                 if (this._srcBlendFactor === BlendFactor.SRC_ALPHA && !minigame.isDevTool
-                    && !(this._font instanceof BitmapFont) && !this._customMaterial) {
+                    && !(isBitmapFontLike(this._font)) && !this._customMaterial) {
                     // Premultiplied alpha on runtime when sdk verion is lower than 2.0.0
                     this._srcBlendFactor = BlendFactor.ONE;
                 }

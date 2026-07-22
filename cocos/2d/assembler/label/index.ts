@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2017-2023 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
@@ -30,11 +30,16 @@ import { letter } from './letter';
 import { ttf } from './ttf';
 import { TextProcessing } from './text-processing';
 
+function isBitmapFontLike (font: unknown): font is BitmapFont {
+    const bitmapFont = font as any;
+    return !!bitmapFont && (bitmapFont instanceof BitmapFont || !!bitmapFont.spriteFrame || !!bitmapFont.fntConfig || !!bitmapFont.fontDefDictionary);
+}
+
 const labelAssembler: IAssemblerManager = {
     getAssembler (comp: Label): IAssembler {
         let assembler: IAssembler = ttf;
 
-        if (comp.font instanceof BitmapFont) {
+        if (isBitmapFontLike(comp.font)) {
             assembler = bmfont;
         } else if (comp.cacheMode === CacheMode.CHAR) {
             assembler = letter;

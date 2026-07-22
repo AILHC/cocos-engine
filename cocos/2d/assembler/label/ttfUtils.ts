@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2017-2023 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
@@ -124,7 +124,12 @@ export class TTFUtils {
             style.fontScale = view.getScaleX();
             this.updateProcessingData(style, layout, outputLayoutData, outputRenderData, comp, trans);
             // use canvas in assemblerData // to do to optimize
-            processing.setCanvasUsed(comp.assemblerData!.canvas, comp.assemblerData!.context);
+            let assemblerData = comp.assemblerData;
+            if (!assemblerData || !assemblerData.canvas) {
+                assemblerData = this.getAssemblerData();
+                (comp as any)._assemblerData = assemblerData;
+            }
+            processing.setCanvasUsed(assemblerData.canvas, assemblerData.context);
             style.fontFamily = this._updateFontFamily(comp);
             this._resetDynamicAtlas(comp);
 
